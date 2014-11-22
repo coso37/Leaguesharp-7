@@ -29,7 +29,7 @@ namespace LSharpClock
             Clock.AddItem(new MenuItem("offX2", "Offset for width").SetValue(new Slider(0, -50, 50)));
             Clock.AddItem(new MenuItem("offY2", "Offset for height").SetValue(new Slider(0, -50, 50)));
             Clock.AddToMainMenu();
-                Game.PrintChat("Clock2 loaded");
+                Game.PrintChat("Clock loaded");
                 Drawing.OnDraw += Drawing_OnDraw;
         }
         private static void Drawing_OnDraw(EventArgs args)
