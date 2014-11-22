@@ -1,4 +1,0 @@
-0000000000000000000000000000000000000000 3ce0e4a51d3f9dba2e7b55c7e7dba504b743f37b daYMAN007 <da.ga@live.de> 1416588595 +0100	commit (initial): :confetti_ball: Added .gitattributes
-3ce0e4a51d3f9dba2e7b55c7e7dba504b743f37b 555b11519ea039b170942c40beb0ea756296a02c daYMAN007 <da.ga@live.de> 1416588705 +0100	commit: Release
-555b11519ea039b170942c40beb0ea756296a02c ce2b8b0f092abadc498004c21d390f1b34965ac0 daYMAN007 <da.ga@live.de> 1416588731 +0100	revert: Revert "Release"
-ce2b8b0f092abadc498004c21d390f1b34965ac0 87412f1dbe1f24404bdc9a03fa252415c0645f69 daYMAN007 <da.ga@live.de> 1416588799 +0100	commit: I dont get Git
