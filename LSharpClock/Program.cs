@@ -48,7 +48,8 @@ namespace LSharpClock
                     else
                     {
                         time = DateTime.Now.ToString("hh:mm tt", new CultureInfo("en-US"));
-                        OffsetX = Clock.Item("offX2").GetValue<Slider>().Value - 12 - 8; //10 px for AM /PM
+
+                        OffsetX = Clock.Item("offX2").GetValue<Slider>().Value - 12+8; //10 px for AM /PM
 
                     }
                 }
@@ -63,7 +64,7 @@ namespace LSharpClock
                     else
                     {
                         time = DateTime.Now.ToString("HH:mm tt");
-                        OffsetX = Clock.Item("offX2").GetValue<Slider>().Value - 8;
+                        OffsetX = Clock.Item("offX2").GetValue<Slider>().Value +8;
                     }
                 }
             }
