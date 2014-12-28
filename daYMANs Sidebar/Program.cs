@@ -8,6 +8,7 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Reflection;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Web;
 using System.Web.Script.Serialization;
@@ -27,6 +28,7 @@ namespace ConsoleApplication12
         private static string _version;
         private static Sprite Sprite;
         private static float x, y;
+        private static float[] respawntime = {0,0,0,0,0,0,0,0,0,0};
         public static string[] NoEnergie =
 {
 "Aatrox", "DrMundo", "Vladimir",
@@ -41,8 +43,7 @@ namespace ConsoleApplication12
         private static float Height = Drawing.Height;
         private static float Width = Drawing.Width;
         private static int scale = 1;
-        static SharpDX.Direct3D9.Font levelFont;
-        static SharpDX.Direct3D9.Font hpFont;
+        static SharpDX.Direct3D9.Font small, respawnfont;
         private static Texture HUD, HUDult, hpTexture, manaTexture,blackTexture,energieTexture;
         private static void Main(string[] args)
         {
@@ -53,17 +54,17 @@ namespace ConsoleApplication12
             hpTexture = Texture.FromMemory(Drawing.Direct3DDevice, (byte[])new ImageConverter().ConvertTo(Resources.HPbar, typeof(byte[])), 58, 10, 0, Usage.None, Format.A1, Pool.Managed, Filter.Default, Filter.Default, 0);
             manaTexture = Texture.FromMemory(Drawing.Direct3DDevice, (byte[])new ImageConverter().ConvertTo(Resources.MANAbar, typeof(byte[])), 58, 10, 0, Usage.None, Format.A1, Pool.Managed, Filter.Default, Filter.Default, 0);
             energieTexture = Texture.FromMemory(Drawing.Direct3DDevice, (byte[])new ImageConverter().ConvertTo(Resources.Energiebar, typeof(byte[])), 58, 10, 0, Usage.None, Format.A1, Pool.Managed, Filter.Default, Filter.Default, 0);
-            levelFont = new SharpDX.Direct3D9.Font(Drawing.Direct3DDevice, new FontDescription()
+            small = new SharpDX.Direct3D9.Font(Drawing.Direct3DDevice, new FontDescription()
             {
                 FaceName = "Verdana",
                 Height = 10,
                 OutputPrecision = FontPrecision.Default,
                 Quality = FontQuality.Default
             });
-            hpFont = new SharpDX.Direct3D9.Font(Drawing.Direct3DDevice, new FontDescription()
+            respawnfont = new SharpDX.Direct3D9.Font(Drawing.Direct3DDevice, new FontDescription()
             {
                 FaceName = "Verdana",
-                Height = 10,
+                Height = 40,
                 OutputPrecision = FontPrecision.Default,
                 Quality = FontQuality.Default
             });
@@ -125,8 +126,8 @@ namespace ConsoleApplication12
                 {
                     x = -Width + (62 * scale);
                     y = Height * -.10f;
-
-                    //   Print("x:"+x + "y:" + y);
+                    int zahler = 0;
+                    String timetorespawn;
                     foreach (var enemie in enemyList)
                     {
 
@@ -137,12 +138,32 @@ namespace ConsoleApplication12
                             Sprite.Draw(enemie.Icon, new ColorBGRA(255, 255, 255, 255), null, new Vector3(x - 5, y - 8, 0), null);
                             Sprite.End();
 
-                            if (enemie.Hero.IsDead)
+                            if (enemie.Hero.IsDead&&respawntime[zahler]<Game.ClockTime)
                             {
-                               Print(enemie.Hero.DeathDuration.ToString());
-                               //todo get respawn timer
-                           }
-                        
+                                respawntime[zahler] = Game.ClockTime+enemie.Hero.DeathDuration;
+                                //todo get respawn timer
+                            }
+                        else if (respawntime[zahler] > Game.ClockTime)
+                        {
+                            timetorespawn = (Math.Round(respawntime[zahler] - Game.ClockTime)).ToString();
+                            if (timetorespawn.Length == 1)
+                            {
+                                respawnfont.DrawText(null, timetorespawn,
+    (int)x * -1 + 21,
+    (int)y * -1 + +13,
+    new ColorBGRA(248, 248, 255, 255));
+                            }
+                            else
+                            {
+                                respawnfont.DrawText(null, timetorespawn,
+    (int)x * -1 + 10,
+    (int)y * -1 + 13,
+    new ColorBGRA(248, 248, 255, 255));
+                            
+                                    
+                                
+                            }
+                        }
                       
 
                         String HP = Math.Round(enemie.Hero.Health) + "/" + Math.Round(enemie.Hero.MaxHealth);
@@ -154,7 +175,7 @@ namespace ConsoleApplication12
                         Sprite.Draw(HUD, new ColorBGRA(255, 255, 255, 255), null, new Vector3(x, y, 0), null); //todo add % value for heigh 
                         Sprite.End();
                         // //draw level  weiss =    248-248-255
-                        levelFont.DrawText(null, enemie.Hero.Level.ToString(), (int)x * -1 + 48, (int)y * -1 + 52, new ColorBGRA(248, 248, 255, 255));
+                        small.DrawText(null, enemie.Hero.Level.ToString(), (int)x * -1 + 48, (int)y * -1 + 52, new ColorBGRA(248, 248, 255, 255));
 
                         
                         if (enemie.Hero.Spellbook.GetSpell(SpellSlot.R).CooldownExpires < Game.Time && enemie.Hero.Spellbook.GetSpell(SpellSlot.R).Level>0)
@@ -164,7 +185,6 @@ namespace ConsoleApplication12
                             Sprite.End();
 
                         }
-                       Print(enemie.Hero.ChampionName);
                         if (!NoEnergie.Contains(enemie.Hero.ChampionName))
                         {
                             String Mana = Math.Round(enemie.Hero.Mana) + "/" + Math.Round(enemie.Hero.MaxMana);
@@ -178,21 +198,24 @@ namespace ConsoleApplication12
                             }
                             else
                             {
-                                Sprite.Draw(manaTexture, new ColorBGRA(255, 255, 255, 255), new SharpDX.Rectangle(0, 0, manawidth, 10), new Vector3(x - 2, y - 57 - 7 - 14, 0),
+                                Sprite.Draw(energieTexture, new ColorBGRA(255, 255, 255, 255), new SharpDX.Rectangle(0, 0, manawidth, 10), new Vector3(x - 2, y - 57 - 7 - 14, 0),
                                     null);
                             }
                             Sprite.End();
-                            hpFont.DrawText(null, Mana, (int) x*-1 + 2 + Manalength, (int) y*-1 + 65 + 14,
+                            small.DrawText(null, Mana, (int)x * -1 + 2 + Manalength, (int)y * -1 + 65 + 14,
                                 new ColorBGRA(248, 248, 255, 255));
                         }
                         else
+                        {
+                            
+                        }
 
                         //draw HP/MAXHP 
                         
                         Sprite.Begin();
                         Sprite.Draw(hpTexture, new ColorBGRA(255, 255, 255, 255), new SharpDX.Rectangle(0, 0, hpwidth, 10), new Vector3(x - 2, y - 57 - 7, 0), null);
                         Sprite.End();
-                        hpFont.DrawText(null, HP, (int)x * -1 + 2 + hplength, (int)y * -1 + 65, new ColorBGRA(248, 248, 255, 255));
+                        small.DrawText(null, HP, (int)x * -1 + 2 + hplength, (int)y * -1 + 65, new ColorBGRA(248, 248, 255, 255));
                         if (!enemie.Hero.IsVisible||enemie.Hero.IsDead)//make it black :)
                         {
                             Sprite.Begin(); //DRAW icon 255, 255, 255, 255
@@ -200,7 +223,9 @@ namespace ConsoleApplication12
                             Sprite.End();
                         }
                         y = y - 94;
+                        zahler++;   
                      }
+                    
                 }
             }
             catch
@@ -254,7 +279,7 @@ namespace ConsoleApplication12
             {
                 var enemie = new enemies(hero, bmp);
                 enemyList.Add(enemie);
-            } Print(GetImageCached(hero.ChampionName));
+            } 
         }
 
         private float GetScale()
