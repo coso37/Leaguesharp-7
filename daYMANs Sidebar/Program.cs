@@ -28,7 +28,14 @@ namespace ConsoleApplication12
         private static string _version;
         private static Sprite Sprite;
         private static float x, y;
-        private static float[] respawntime = {0,0,0,0,0,0,0,0,0,0};
+        public static SpellSlot[] SummonerSpellSlots = { ((SpellSlot)4), ((SpellSlot)5) };
+        private static float[] respawntime = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+        public static string[] SummonersNames =
+{
+"summonerbarrier", "summonernoost", "summonerclairvoyance",
+"summonerdot", "summonerexhaust", "summonerflash", "summonerhaste", "summonerheal", "summonermana",
+"summonerodingarrison", "summonerrevive", "summonersmite", "summonerteleport"
+};
         public static string[] NoEnergie =
 {
 "Aatrox", "DrMundo", "Vladimir",
@@ -43,21 +50,45 @@ namespace ConsoleApplication12
         private static float Height = Drawing.Height;
         private static float Width = Drawing.Width;
         private static int scale = 1;
-        static SharpDX.Direct3D9.Font small, respawnfont;
-        private static Texture HUD, HUDult, hpTexture, manaTexture,blackTexture,energieTexture;
+        static SharpDX.Direct3D9.Font small, respawnfont,medium;
+        private static Texture HUD, HUDult, hpTexture, manaTexture, blackTexture, energieTexture;
+        private static Texture temp, summonerheal, summonerbarrier, summonerboost, summonerclairvoyance, summonerdot, summonerexhaust, summonerflash, summonerhaste, summonermana, summonerodingarrison, summonerrevive, summonersmite, summonerteleport;
         private static void Main(string[] args)
         {
             Sprite = new Sprite(Drawing.Direct3DDevice);
             HUDult = Texture.FromMemory(Drawing.Direct3DDevice, (byte[])new ImageConverter().ConvertTo(Resources.HUDult, typeof(byte[])), 16, 16, 0, Usage.None, Format.A1, Pool.Managed, Filter.Default, Filter.Default, 0);
-            blackTexture = Texture.FromMemory(Drawing.Direct3DDevice, (byte[])new ImageConverter().ConvertTo(Resources.schwarz, typeof(byte[])), 62, 90, 0, Usage.None, Format.A1, Pool.Managed, Filter.Default, Filter.Default, 0);
-            HUD = Texture.FromMemory(Drawing.Direct3DDevice, (byte[])new ImageConverter().ConvertTo(Resources.HUDtest, typeof(byte[])), 62, 90, 0, Usage.None, Format.A1, Pool.Managed, Filter.Default, Filter.Default, 0);
+            blackTexture = Texture.FromMemory(Drawing.Direct3DDevice, (byte[])new ImageConverter().ConvertTo(Resources.schwarz, typeof(byte[])), 62 + 24, 90, 0, Usage.None, Format.A1, Pool.Managed, Filter.Default, Filter.Default, 0);
+            HUD = Texture.FromMemory(Drawing.Direct3DDevice, (byte[])new ImageConverter().ConvertTo(Resources.HUDtest, typeof(byte[])), 62 + 24, 90, 0, Usage.None, Format.A1, Pool.Managed, Filter.Default, Filter.Default, 0);
             hpTexture = Texture.FromMemory(Drawing.Direct3DDevice, (byte[])new ImageConverter().ConvertTo(Resources.HPbar, typeof(byte[])), 58, 10, 0, Usage.None, Format.A1, Pool.Managed, Filter.Default, Filter.Default, 0);
             manaTexture = Texture.FromMemory(Drawing.Direct3DDevice, (byte[])new ImageConverter().ConvertTo(Resources.MANAbar, typeof(byte[])), 58, 10, 0, Usage.None, Format.A1, Pool.Managed, Filter.Default, Filter.Default, 0);
             energieTexture = Texture.FromMemory(Drawing.Direct3DDevice, (byte[])new ImageConverter().ConvertTo(Resources.Energiebar, typeof(byte[])), 58, 10, 0, Usage.None, Format.A1, Pool.Managed, Filter.Default, Filter.Default, 0);
+            #region summeners
+            summonerheal = Texture.FromMemory(Drawing.Direct3DDevice, (byte[])new ImageConverter().ConvertTo(Resources.SummonerHeal, typeof(byte[])), 24, 480, 0, Usage.None, Format.A1, Pool.Managed, Filter.Default, Filter.Default, 0);
+            summonerbarrier = Texture.FromMemory(Drawing.Direct3DDevice, (byte[])new ImageConverter().ConvertTo(Resources.SummonerBarrier, typeof(byte[])), 24, 480, 0, Usage.None, Format.A1, Pool.Managed, Filter.Default, Filter.Default, 0);
+            summonerboost = Texture.FromMemory(Drawing.Direct3DDevice, (byte[])new ImageConverter().ConvertTo(Resources.SummonerBoost, typeof(byte[])), 24, 480, 0, Usage.None, Format.A1, Pool.Managed, Filter.Default, Filter.Default, 0);
+            summonerclairvoyance = Texture.FromMemory(Drawing.Direct3DDevice, (byte[])new ImageConverter().ConvertTo(Resources.SummonerClairvoyance, typeof(byte[])), 24, 480, 0, Usage.None, Format.A1, Pool.Managed, Filter.Default, Filter.Default, 0);
+            summonerdot = Texture.FromMemory(Drawing.Direct3DDevice, (byte[])new ImageConverter().ConvertTo(Resources.SummonerDot, typeof(byte[])), 24, 480, 0, Usage.None, Format.A1, Pool.Managed, Filter.Default, Filter.Default, 0);
+            summonerflash = Texture.FromMemory(Drawing.Direct3DDevice, (byte[])new ImageConverter().ConvertTo(Resources.SummonerFlash, typeof(byte[])), 24, 480, 0, Usage.None, Format.A1, Pool.Managed, Filter.Default, Filter.Default, 0);
+            summonerhaste = Texture.FromMemory(Drawing.Direct3DDevice, (byte[])new ImageConverter().ConvertTo(Resources.SummonerHaste, typeof(byte[])), 24, 480, 0, Usage.None, Format.A1, Pool.Managed, Filter.Default, Filter.Default, 0);
+            summonerexhaust = Texture.FromMemory(Drawing.Direct3DDevice, (byte[])new ImageConverter().ConvertTo(Resources.SummonerExhaust, typeof(byte[])), 24, 480, 0, Usage.None, Format.A1, Pool.Managed, Filter.Default, Filter.Default, 0);
+            summonermana = Texture.FromMemory(Drawing.Direct3DDevice, (byte[])new ImageConverter().ConvertTo(Resources.SummonerMana, typeof(byte[])), 24, 480, 0, Usage.None, Format.A1, Pool.Managed, Filter.Default, Filter.Default, 0);
+            summonerodingarrison = Texture.FromMemory(Drawing.Direct3DDevice, (byte[])new ImageConverter().ConvertTo(Resources.SummonerOdinGarrison, typeof(byte[])), 24, 480, 0, Usage.None, Format.A1, Pool.Managed, Filter.Default, Filter.Default, 0);
+            summonerrevive = Texture.FromMemory(Drawing.Direct3DDevice, (byte[])new ImageConverter().ConvertTo(Resources.SummonerRevive, typeof(byte[])), 24, 480, 0, Usage.None, Format.A1, Pool.Managed, Filter.Default, Filter.Default, 0);
+            summonersmite = Texture.FromMemory(Drawing.Direct3DDevice, (byte[])new ImageConverter().ConvertTo(Resources.SummonerSmite, typeof(byte[])), 24, 480, 0, Usage.None, Format.A1, Pool.Managed, Filter.Default, Filter.Default, 0);
+            summonerteleport = Texture.FromMemory(Drawing.Direct3DDevice, (byte[])new ImageConverter().ConvertTo(Resources.SummonerTeleport, typeof(byte[])), 24, 480, 0, Usage.None, Format.A1, Pool.Managed, Filter.Default, Filter.Default, 0);
+
+            #endregion
             small = new SharpDX.Direct3D9.Font(Drawing.Direct3DDevice, new FontDescription()
             {
                 FaceName = "Verdana",
                 Height = 10,
+                OutputPrecision = FontPrecision.Default,
+                Quality = FontQuality.Default
+            });
+            medium = new SharpDX.Direct3D9.Font(Drawing.Direct3DDevice, new FontDescription()
+            {
+                FaceName = "Verdana",
+                Height = 16,
                 OutputPrecision = FontPrecision.Default,
                 Quality = FontQuality.Default
             });
@@ -80,10 +111,6 @@ namespace ConsoleApplication12
         {
             SidebarMenu = new Menu("sidebar", "sidebar", true);
             SidebarMenu.AddItem(new MenuItem("Activate", "Activate")).SetValue(true);
-            SidebarMenu.AddItem(new MenuItem("offX2", "Offset for width").SetValue(new Slider(0, -1680, 1680)));
-            SidebarMenu.AddItem(new MenuItem("offY2", "Offset for height").SetValue(new Slider(0, -1680, 1680)));
-            SidebarMenu.AddItem(new MenuItem("offX3", "Offset for width2").SetValue(new Slider(0, -100, 100)));
-            SidebarMenu.AddItem(new MenuItem("offY3", "Offset for height2").SetValue(new Slider(0, -100, 100)));
             SidebarMenu.AddToMainMenu();
 
 
@@ -116,6 +143,7 @@ namespace ConsoleApplication12
         {
             Sprite.OnLostDevice();
         }
+
         static void Drawing_OnDraw(EventArgs args)
         {
             if (Drawing.Direct3DDevice == null || Drawing.Direct3DDevice.IsDisposed)
@@ -124,61 +152,120 @@ namespace ConsoleApplication12
             {
                 if (SidebarMenu.Item("Activate").GetValue<bool>()) //drawHUD
                 {
-                    x = -Width + (62 * scale);
+                    x = -Width + ((62 + 24) * scale);
                     y = Height * -.10f;
                     int zahler = 0;
                     String timetorespawn;
                     foreach (var enemie in enemyList)
                     {
+                        int z = 0;
+                        foreach (var sSlot in SummonerSpellSlots)    //Imeh again
+                        {
+                            var spell = enemie.Hero.Spellbook.GetSpell(sSlot);
 
-
-
-                  
-                            Sprite.Begin(); //DRAW icon 255, 255, 255, 255
-                            Sprite.Draw(enemie.Icon, new ColorBGRA(255, 255, 255, 255), null, new Vector3(x - 5, y - 8, 0), null);
-                            Sprite.End();
-
-                            if (enemie.Hero.IsDead&&respawntime[zahler]<Game.ClockTime)
+                            var t = spell.CooldownExpires - Game.Time;
+                            var percent = (Math.Abs(spell.Cooldown) > float.Epsilon) ? t / spell.Cooldown : 1f;
+                           var n = (t > 0) ? (int)(19 * (1f - percent)) : 19;
+                             var ts = TimeSpan.FromSeconds((int)t);
+                             var s = t > 60 ? string.Format("{0}:{1:D2}", ts.Minutes, ts.Seconds) : String.Format("{0:0}", t);
+                        if (t > 0)
                             {
-                                respawntime[zahler] = Game.ClockTime+enemie.Hero.DeathDuration;
-                                //todo get respawn timer
+                               
+                                medium.DrawText(
+                                    null, s, Convert.ToInt32(-x - 4 - s.Length * 7), Convert.ToInt32(-y + 7 + z),
+                                    new ColorBGRA(255, 255, 255, 255));
                             }
-                        else if (respawntime[zahler] > Game.ClockTime)
+
+
+
+                            Sprite.Begin();
+                            switch (spell.Name)
+                            {//shitty code but im to tired
+                                case "summonerodingarrison":
+                                    Sprite.Draw(summonerodingarrison, new ColorBGRA(255, 255, 255, 255), new SharpDX.Rectangle(0, 24 * n, 24, 24), new Vector3(x - 2, y - 7 - z, 0));
+                                    break;
+                                case "summonerrevive":
+                                    Sprite.Draw(summonerrevive, new ColorBGRA(255, 255, 255, 255), new SharpDX.Rectangle(0, 24 * n, 24, 24), new Vector3(x - 2, y - 7 - z, 0));
+
+                                    break;
+                                case "summonerclairvoyance":
+                                    Sprite.Draw(summonerclairvoyance, new ColorBGRA(255, 255, 255, 255), new SharpDX.Rectangle(0, 24 * n, 24, 24), new Vector3(x - 2, y - 7 - z, 0));
+                                    break;
+                                case "summonerboost":
+                                    Sprite.Draw(summonerboost, new ColorBGRA(255, 255, 255, 255), new SharpDX.Rectangle(0, 24 * n, 24, 24), new Vector3(x - 2, y - 7 - z, 0));
+                                    break;
+                                case "summonermana":
+                                    Sprite.Draw(summonermana, new ColorBGRA(255, 255, 255, 255), new SharpDX.Rectangle(0, 24 * n, 24, 24), new Vector3(x - 2, y - 7 - z, 0));
+                                    break;
+                                case "summonerteleport":
+                                    Sprite.Draw(summonerteleport, new ColorBGRA(255, 255, 255, 255), new SharpDX.Rectangle(0, 24 * n, 24, 24), new Vector3(x, y - 7 - z, 0));
+                                    break;
+                                case "summonerheal":
+                                    Sprite.Draw(summonerheal, new ColorBGRA(255, 255, 255, 255), new SharpDX.Rectangle(0, 24 * n, 24, 24), new Vector3(x - 2, y - 7 - z, 0));
+                                    break;
+                                case "summonerexhaust":
+                                    Sprite.Draw(summonerexhaust, new ColorBGRA(255, 255, 255, 255), new SharpDX.Rectangle(0, 24 * n, 24, 24), new Vector3(x - 2, y - 7 - z, 0));
+                                    break;
+                                case "summonersmite":
+                                    Sprite.Draw(summonersmite, new ColorBGRA(255, 255, 255, 255), new SharpDX.Rectangle(0, 24 * n, 24, 24), new Vector3(x - 2, y - 7 - z, 0));
+                                    break;
+                                case "summonerdot":
+                                    Sprite.Draw(summonerdot, new ColorBGRA(255, 255, 255, 255), new SharpDX.Rectangle(0, 24 * n, 24, 24), new Vector3(x - 2, y - 7 - z, 0));
+                                    break;
+                                case "summonerhaste":
+                                    Sprite.Draw(summonerhaste, new ColorBGRA(255, 255, 255, 255), new SharpDX.Rectangle(0, 24 * n, 24, 24), new Vector3(x - 2, y - 7 - z, 0));
+                                    break;
+                                case "summonerflash":
+                                    Sprite.Draw(summonerflash, new ColorBGRA(255, 255, 255, 255), new SharpDX.Rectangle(0, 24 * n, 24, 24), new Vector3(x - 2, y - 7 - z, 0));
+                                    break;
+                                default:
+                                    Sprite.Draw(summonerbarrier, new ColorBGRA(255, 255, 255, 255), new SharpDX.Rectangle(0, 24 * n, 24, 24), new Vector3(x - 2, y - 7 - z, 0));
+                                    break;
+                            }
+                            Sprite.End();
+                            z = 24;
+                        } //Imeh end 
+                        x = x - 23;//fix wege i ha falsch agfange
+
+
+                        Sprite.Begin(); //DRAW icon 255, 255, 255, 255
+                        Sprite.Draw(enemie.Icon, new ColorBGRA(255, 255, 255, 255), null, new Vector3(x - 5, y - 8, 0), null);
+                        Sprite.End();
+
+                        if (enemie.Hero.IsDead && respawntime[zahler] < Game.ClockTime)
+                        {
+                            respawntime[zahler] = Game.ClockTime + enemie.Hero.DeathDuration;
+                            //todo get respawn timer
+                        }
+                        else if (enemie.Hero.IsDead && (respawntime[zahler] > Game.ClockTime))
                         {
                             timetorespawn = (Math.Round(respawntime[zahler] - Game.ClockTime)).ToString();
                             if (timetorespawn.Length == 1)
                             {
-                                respawnfont.DrawText(null, timetorespawn,
-    (int)x * -1 + 21,
-    (int)y * -1 + +13,
-    new ColorBGRA(248, 248, 255, 255));
+                                respawnfont.DrawText(null, timetorespawn,(int)x * -1 + 21,(int)y * -1 + 13,new ColorBGRA(248, 248, 255, 255));
                             }
                             else
                             {
-                                respawnfont.DrawText(null, timetorespawn,
-    (int)x * -1 + 10,
-    (int)y * -1 + 13,
-    new ColorBGRA(248, 248, 255, 255));
-                            
-                                    
-                                
+                                respawnfont.DrawText(null, timetorespawn,(int)x * -1 + 10,(int)y * -1 + 13,new ColorBGRA(248, 248, 255, 255));
                             }
                         }
-                      
+
 
                         String HP = Math.Round(enemie.Hero.Health) + "/" + Math.Round(enemie.Hero.MaxHealth);
-                       
-                        int hplength = ((58-(HP.Length * 5 ))/2); //to center text
+
+                        int hplength = ((58 - (HP.Length * 5)) / 2); //to center text
                         hpwidth = Convert.ToInt32(((58f / 100f) * (enemie.Hero.HealthPercentage())));
                         Sprite.Begin(); //DRAW HUD
                         // //ziel:-1617 / -124 //bild 1 -4/-26 55x55
-                        Sprite.Draw(HUD, new ColorBGRA(255, 255, 255, 255), null, new Vector3(x, y, 0), null); //todo add % value for heigh 
+                        x = x + 23;//fix wege i ha falsch agfange
+                        Sprite.Draw(HUD, new ColorBGRA(255, 255, 255, 255), new SharpDX.Rectangle(1, 0, 62 + 23, 90), new Vector3(x, y, 0), null); //todo add % value for heigh 
+                        x = x - 23;//fix wege i ha falsch agfange
                         Sprite.End();
                         // //draw level  weiss =    248-248-255
                         small.DrawText(null, enemie.Hero.Level.ToString(), (int)x * -1 + 48, (int)y * -1 + 52, new ColorBGRA(248, 248, 255, 255));
 
-                        
-                        if (enemie.Hero.Spellbook.GetSpell(SpellSlot.R).CooldownExpires < Game.Time && enemie.Hero.Spellbook.GetSpell(SpellSlot.R).Level>0)
+
+                        if (enemie.Hero.Spellbook.GetSpell(SpellSlot.R).CooldownExpires < Game.Time && enemie.Hero.Spellbook.GetSpell(SpellSlot.R).Level > 0)
                         {
                             Sprite.Begin();
                             Sprite.Draw(HUDult, new ColorBGRA(255, 255, 255, 255), null, new Vector3(x + -46, y + -2, 0), null);
@@ -188,8 +275,8 @@ namespace ConsoleApplication12
                         if (!NoEnergie.Contains(enemie.Hero.ChampionName))
                         {
                             String Mana = Math.Round(enemie.Hero.Mana) + "/" + Math.Round(enemie.Hero.MaxMana);
-                            int manawidth = Convert.ToInt32(((58f/100f)*(enemie.Hero.ManaPercentage())));
-                            int Manalength = ((58 - (Mana.Length*5))/2); //to center t
+                            int manawidth = Convert.ToInt32(((58f / 100f) * (enemie.Hero.ManaPercentage())));
+                            int Manalength = ((58 - (Mana.Length * 5)) / 2); //to center t
                             //draw MANA /Manabar
                             Sprite.Begin();
                             if (!Energie.Contains(enemie.Hero.ChampionName))
@@ -207,25 +294,32 @@ namespace ConsoleApplication12
                         }
                         else
                         {
-                            
+
                         }
 
                         //draw HP/MAXHP 
-                        
+
                         Sprite.Begin();
                         Sprite.Draw(hpTexture, new ColorBGRA(255, 255, 255, 255), new SharpDX.Rectangle(0, 0, hpwidth, 10), new Vector3(x - 2, y - 57 - 7, 0), null);
                         Sprite.End();
                         small.DrawText(null, HP, (int)x * -1 + 2 + hplength, (int)y * -1 + 65, new ColorBGRA(248, 248, 255, 255));
-                        if (!enemie.Hero.IsVisible||enemie.Hero.IsDead)//make it black :)
+                        if (!enemie.Hero.IsVisible || enemie.Hero.IsDead)//make it black :)
                         {
                             Sprite.Begin(); //DRAW icon 255, 255, 255, 255
-                            Sprite.Draw(blackTexture, new ColorBGRA(255, 255, 255, 110), null, new Vector3(x, y, 0), null);
+                            Sprite.Draw(blackTexture, new ColorBGRA(255, 255, 255, 110), null, new Vector3(x+24, y, 0), null);
                             Sprite.End();
                         }
+
+
+
+                        x = x + 23;
                         y = y - 94;
-                        zahler++;   
-                     }
-                    
+                        zahler++;
+
+                    }
+
+
+
                 }
             }
             catch
@@ -256,7 +350,7 @@ namespace ConsoleApplication12
             else
             {
                 int attempt = 0;
-                 bmp = DownloadImage(hero.ChampionName);
+                bmp = DownloadImage(hero.ChampionName);
                 while (bmp == null && attempt < 5)
                 {
                     bmp = DownloadImage(hero.ChampionName);
@@ -271,7 +365,7 @@ namespace ConsoleApplication12
                 }
                 else
                 {
-                    
+
                     bmp.Save(GetImageCached(hero.ChampionName));
                 }
             }
@@ -279,7 +373,7 @@ namespace ConsoleApplication12
             {
                 var enemie = new enemies(hero, bmp);
                 enemyList.Add(enemie);
-            } 
+            }
         }
 
         private float GetScale()

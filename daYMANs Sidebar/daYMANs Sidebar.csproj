@@ -98,6 +98,19 @@
   <ItemGroup>
     <Content Include="Resources\Energiebar.png" />
     <Content Include="Resources\HPbar.png" />
+    <Content Include="Resources\SummonerBarrier.png" />
+    <Content Include="Resources\SummonerBoost.png" />
+    <Content Include="Resources\SummonerClairvoyance.png" />
+    <Content Include="Resources\SummonerDot.png" />
+    <Content Include="Resources\SummonerExhaust.png" />
+    <Content Include="Resources\SummonerFlash.png" />
+    <Content Include="Resources\SummonerHaste.png" />
+    <Content Include="Resources\SummonerHeal.png" />
+    <Content Include="Resources\SummonerMana.png" />
+    <Content Include="Resources\SummonerOdinGarrison.png" />
+    <Content Include="Resources\SummonerRevive.png" />
+    <Content Include="Resources\SummonerSmite.png" />
+    <Content Include="Resources\SummonerTeleport.png" />
     <None Include="Resources\schwarz.png" />
     <None Include="Resources\HUDult.png" />
     <None Include="Resources\HUDtest.png" />
