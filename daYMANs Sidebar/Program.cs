@@ -23,10 +23,11 @@ namespace ConsoleApplication12
 {
     internal class Program
     {
-        public static Menu SidebarMenu;
+        public static Menu SidebarMenu, Leftbar;
         private static readonly IList<enemies> enemyList = new List<enemies>();
         private static string _version;
         private static Sprite Sprite;
+        private static Obj_AI_Hero hero { get { return ObjectManager.Player; } }
         private static float x, y;
         public static SpellSlot[] SummonerSpellSlots = { ((SpellSlot)4), ((SpellSlot)5) };
         private static float[] respawntime = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
@@ -110,6 +111,12 @@ namespace ConsoleApplication12
         private static void Game_OnGameLoad(EventArgs args)
         {
             SidebarMenu = new Menu("sidebar", "sidebar", true);
+            Leftbar = new Menu("sidebar", "Left sidebar", false);
+            Leftbar.AddItem(new MenuItem("Activate", "Activate")).SetValue(true);
+            Leftbar.AddItem(new MenuItem("offX", "Offset for width").SetValue(new Slider(0, -50, 50)));
+            Leftbar.AddItem(new MenuItem("offY", "Offset for height").SetValue(new Slider(0, -100, 100)));
+            Leftbar.AddItem(new MenuItem("Distance", "Distance").SetValue(new Slider(0, -50, 50)));
+            SidebarMenu.AddSubMenu(Leftbar);
             SidebarMenu.AddItem(new MenuItem("Activate", "Activate")).SetValue(true);
             SidebarMenu.AddToMainMenu();
 
@@ -127,10 +134,15 @@ namespace ConsoleApplication12
             {
                 LoadImages();
                 Print("Loaded! ");
+                Drawing.OnPostReset += DrawingOnPostReset;
+                Drawing.OnPreReset += DrawingOnPreReset;
                 Drawing.OnDraw += Drawing_OnDraw;
 
             }
         }
+
+
+
         private static void CurrentDomainOnDomainUnload(object sender, EventArgs e)
         {
             Sprite.Dispose();
@@ -310,17 +322,108 @@ namespace ConsoleApplication12
                             Sprite.End();
                         }
 
-
-
+                        //if (enemie.Hero.Health < 350 && ((int)hero.Spellbook.GetSpell(SpellSlot.R).SData.CastRange.GetValue(0)) < 5000 && enemie.Hero.ServerPosition.Distance(hero.ServerPosition) < (int)hero.Spellbook.GetSpell(SpellSlot.R).SData.CastRange.GetValue(0) && hero.Spellbook.GetSpell(SpellSlot.R).Cooldown.Equals(0)&&hero.Level>=6)
+                        //{
+                        //  Print("mach ult");
+                        //  //todo ping on  enemie.Hero.ServerPosition
+                        //  {
+                        //      Packet.S2C.Ping.Encoded(new Packet.S2C.Ping.Struct(enemie.Hero.Position.X, enemie.Hero.Position.Y,
+                        //      enemie.Hero.NetworkId,
+                        //      ObjectManager.Player.NetworkId, Packet.PingType.Danger)).Process();
+                        //  }
+                         
+                        //}
+                        //todo ping on  enemie.Hero.ServerPosition
+                        Print(enemie.Hero.MinionsKilled.ToString());
                         x = x + 23;
                         y = y - 94;
                         zahler++;
 
                     }
-
-
-
                 }
+                    if (Leftbar.Item("Activate").GetValue<bool>())
+                    {
+                        x = Leftbar.Item("offX").GetValue<Slider>().Value-50;
+                        y = Leftbar.Item("offY").GetValue<Slider>().Value-50 ;
+                        foreach (Obj_AI_Hero herosHero in ObjectManager.Get<Obj_AI_Hero>().Where(herosHero => herosHero != null && herosHero.Team == ObjectManager.Player.Team && hero.IsValid && herosHero.Name != hero.Name))
+                        {
+                            int z = 0;
+                            foreach (var sSlot in SummonerSpellSlots)    //Imeh again
+                            {
+                                var spell = herosHero.Spellbook.GetSpell(sSlot);
+
+                                var t = spell.CooldownExpires - Game.Time;
+                                var percent = (Math.Abs(spell.Cooldown) > float.Epsilon) ? t / spell.Cooldown : 1f;
+                                var n = (t > 0) ? (int)(19 * (1f - percent)) : 19;
+                                var ts = TimeSpan.FromSeconds((int)t);
+                                var s = t > 60 ? string.Format("{0}:{1:D2}", ts.Minutes, ts.Seconds) : String.Format("{0:0}", t);
+                                if (t > 0)
+                                {
+
+                                    medium.DrawText(
+                                        null, s, Convert.ToInt32(-x + 12), Convert.ToInt32(-y + 7 + z),
+                                        new ColorBGRA(255, 255, 255, 255));
+                                }
+
+
+                                
+                                Sprite.Begin();
+                                #region dont look at this shit STOP
+                                switch (spell.Name)
+                                {//shitty code but im to tired
+                                    case "summonerodingarrison":
+                                        Sprite.Draw(summonerodingarrison, new ColorBGRA(255, 255, 255, 255), new SharpDX.Rectangle(0, 24 * n, 24, 24), new Vector3(x - 2, y - 7 - z, 0));
+                                        break;
+                                    case "summonerrevive":
+                                        Sprite.Draw(summonerrevive, new ColorBGRA(255, 255, 255, 255), new SharpDX.Rectangle(0, 24 * n, 24, 24), new Vector3(x - 2, y - 7 - z, 0));
+
+                                        break;
+                                    case "summonerclairvoyance":
+                                        Sprite.Draw(summonerclairvoyance, new ColorBGRA(255, 255, 255, 255), new SharpDX.Rectangle(0, 24 * n, 24, 24), new Vector3(x - 2, y - 7 - z, 0));
+                                        break;
+                                    case "summonerboost":
+                                        Sprite.Draw(summonerboost, new ColorBGRA(255, 255, 255, 255), new SharpDX.Rectangle(0, 24 * n, 24, 24), new Vector3(x - 2, y - 7 - z, 0));
+                                        break;
+                                    case "summonermana":
+                                        Sprite.Draw(summonermana, new ColorBGRA(255, 255, 255, 255), new SharpDX.Rectangle(0, 24 * n, 24, 24), new Vector3(x - 2, y - 7 - z, 0));
+                                        break;
+                                    case "summonerteleport":
+                                        Sprite.Draw(summonerteleport, new ColorBGRA(255, 255, 255, 255), new SharpDX.Rectangle(0, 24 * n, 24, 24), new Vector3(x, y - 7 - z, 0));
+                                        break;
+                                    case "summonerheal":
+                                        Sprite.Draw(summonerheal, new ColorBGRA(255, 255, 255, 255), new SharpDX.Rectangle(0, 24 * n, 24, 24), new Vector3(x - 2, y - 7 - z, 0));
+                                        break;
+                                    case "summonerexhaust":
+                                        Sprite.Draw(summonerexhaust, new ColorBGRA(255, 255, 255, 255), new SharpDX.Rectangle(0, 24 * n, 24, 24), new Vector3(x - 2, y - 7 - z, 0));
+                                        break;
+                                    case "summonersmite":
+                                        Sprite.Draw(summonersmite, new ColorBGRA(255, 255, 255, 255), new SharpDX.Rectangle(0, 24 * n, 24, 24), new Vector3(x - 2, y - 7 - z, 0));
+                                        break;
+                                    case "summonerdot":
+                                        Sprite.Draw(summonerdot, new ColorBGRA(255, 255, 255, 255), new SharpDX.Rectangle(0, 24 * n, 24, 24), new Vector3(x - 2, y - 7 - z, 0));
+                                        break;
+                                    case "summonerhaste":
+                                        Sprite.Draw(summonerhaste, new ColorBGRA(255, 255, 255, 255), new SharpDX.Rectangle(0, 24 * n, 24, 24), new Vector3(x - 2, y - 7 - z, 0));
+                                        break;
+                                    case "summonerflash":
+                                        Sprite.Draw(summonerflash, new ColorBGRA(255, 255, 255, 255), new SharpDX.Rectangle(0, 24 * n, 24, 24), new Vector3(x - 2, y - 7 - z, 0));
+                                        break;
+                                    default:
+                                        Sprite.Draw(summonerbarrier, new ColorBGRA(255, 255, 255, 255), new SharpDX.Rectangle(0, 24 * n, 24, 24), new Vector3(x - 2, y - 7 - z, 0));
+                                        break;
+                                }
+                                #endregion
+                                Sprite.End();
+                                z = 24;
+                             
+                            }
+                            y=y -48-Leftbar.Item("Distance").GetValue<Slider>().Value;
+                        }
+                    }
+
+
+
+              
             }
             catch
             {
