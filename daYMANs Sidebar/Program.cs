@@ -44,7 +44,7 @@ namespace ConsoleApplication12
 
         public static string[] Energie =
         {
-            "Akali", "Kennen", "LeeSin", "Shen", "Zed","Gnar","Katarina","RekSai","Riven","Renekton","Rengar","Rumble",
+            "Akali", "Kennen", "LeeSin", "Shen", "Zed","Gnar","Katarina","RekSai","Renekton","Rengar","Rumble",
         };
         private static int hpwidth = 0;
         private static float Height = Drawing.Height;
