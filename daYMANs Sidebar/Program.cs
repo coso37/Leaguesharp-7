@@ -56,7 +56,7 @@ namespace ConsoleApplication12
         private static Texture temp, summonerheal, summonerbarrier, summonerboost, summonerclairvoyance, summonerdot, summonerexhaust, summonerflash, summonerhaste, summonermana, summonerodingarrison, summonerrevive, summonersmite, summonerteleport;
         private static void Main(string[] args)
         {
-            Sprite = new Sprite(Drawing.Direct3DDevice);
+            Sprite = new Sprite(Render.Device);
             HUDult = Texture.FromMemory(Drawing.Direct3DDevice, (byte[])new ImageConverter().ConvertTo(Resources.HUDult, typeof(byte[])), 16, 16, 0, Usage.None, Format.A1, Pool.Managed, Filter.Default, Filter.Default, 0);
             blackTexture = Texture.FromMemory(Drawing.Direct3DDevice, (byte[])new ImageConverter().ConvertTo(Resources.schwarz, typeof(byte[])), 62 + 24, 90, 0, Usage.None, Format.A1, Pool.Managed, Filter.Default, Filter.Default, 0);
             HUD = Texture.FromMemory(Drawing.Direct3DDevice, (byte[])new ImageConverter().ConvertTo(Resources.HUDtest, typeof(byte[])), 62 + 24, 90, 0, Usage.None, Format.A1, Pool.Managed, Filter.Default, Filter.Default, 0);
@@ -136,7 +136,7 @@ namespace ConsoleApplication12
                 Print("Loaded! ");
                 Drawing.OnPostReset += DrawingOnPostReset;
                 Drawing.OnPreReset += DrawingOnPreReset;
-                Drawing.OnDraw += Drawing_OnDraw;
+                Drawing.OnEndScene += Drawing_OnDraw;
 
             }
         }
@@ -334,7 +334,7 @@ namespace ConsoleApplication12
                          
                         //}
                         //todo ping on  enemie.Hero.ServerPosition
-                        Print(enemie.Hero.MinionsKilled.ToString());
+                      //  Print(enemie.Hero.MinionsKilled.ToString());
                         x = x + 23;
                         y = y - 94;
                         zahler++;
