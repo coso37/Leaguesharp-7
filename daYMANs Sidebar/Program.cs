@@ -39,7 +39,7 @@ namespace ConsoleApplication12
         public static string[] NoEnergie =
 {
 "Aatrox", "DrMundo", "Vladimir",
-"Zac","Katarina","Garen" 
+"Zac","Katarina","Garen","Riven" 
 };
 
         public static string[] Energie =
