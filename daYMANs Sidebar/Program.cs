@@ -58,8 +58,8 @@ namespace ConsoleApplication12
         {
             Sprite = new Sprite(Render.Device);
             HUDult = Texture.FromMemory(Drawing.Direct3DDevice, (byte[])new ImageConverter().ConvertTo(Resources.HUDult, typeof(byte[])), 16, 16, 0, Usage.None, Format.A1, Pool.Managed, Filter.Default, Filter.Default, 0);
-            blackTexture = Texture.FromMemory(Drawing.Direct3DDevice, (byte[])new ImageConverter().ConvertTo(Resources.schwarz, typeof(byte[])), 62 + 24, 90, 0, Usage.None, Format.A1, Pool.Managed, Filter.Default, Filter.Default, 0);
-            HUD = Texture.FromMemory(Drawing.Direct3DDevice, (byte[])new ImageConverter().ConvertTo(Resources.HUDtest, typeof(byte[])), 62 + 24, 90, 0, Usage.None, Format.A1, Pool.Managed, Filter.Default, Filter.Default, 0);
+            blackTexture = Texture.FromMemory(Drawing.Direct3DDevice, (byte[])new ImageConverter().ConvertTo(Resources.schwarz, typeof(byte[])), 62 + 24+10, 90, 0, Usage.None, Format.A1, Pool.Managed, Filter.Default, Filter.Default, 0);
+            HUD = Texture.FromMemory(Drawing.Direct3DDevice, (byte[])new ImageConverter().ConvertTo(Resources.HUDtest, typeof(byte[])), 62 + 24+10, 90, 0, Usage.None, Format.A1, Pool.Managed, Filter.Default, Filter.Default, 0);
             hpTexture = Texture.FromMemory(Drawing.Direct3DDevice, (byte[])new ImageConverter().ConvertTo(Resources.HPbar, typeof(byte[])), 58, 10, 0, Usage.None, Format.A1, Pool.Managed, Filter.Default, Filter.Default, 0);
             manaTexture = Texture.FromMemory(Drawing.Direct3DDevice, (byte[])new ImageConverter().ConvertTo(Resources.MANAbar, typeof(byte[])), 58, 10, 0, Usage.None, Format.A1, Pool.Managed, Filter.Default, Filter.Default, 0);
             energieTexture = Texture.FromMemory(Drawing.Direct3DDevice, (byte[])new ImageConverter().ConvertTo(Resources.Energiebar, typeof(byte[])), 58, 10, 0, Usage.None, Format.A1, Pool.Managed, Filter.Default, Filter.Default, 0);
@@ -118,6 +118,7 @@ namespace ConsoleApplication12
             Leftbar.AddItem(new MenuItem("Distance", "Distance").SetValue(new Slider(0, -50, 50)));
             SidebarMenu.AddSubMenu(Leftbar);
             SidebarMenu.AddItem(new MenuItem("Activate", "Activate")).SetValue(true);
+            SidebarMenu.AddItem(new MenuItem("Activate", "Only draw visible enemies")).SetValue(true);
             SidebarMenu.AddToMainMenu();
 
 
@@ -164,12 +165,13 @@ namespace ConsoleApplication12
             {
                 if (SidebarMenu.Item("Activate").GetValue<bool>()) //drawHUD
                 {
-                    x = -Width + ((62 + 24) * scale);
+                    x = -Width + ((62 + 24+10) * scale);
                     y = Height * -.10f;
                     int zahler = 0;
                     String timetorespawn;
                     foreach (var enemie in enemyList)
                     {
+                        x = x - 10;
                         int z = 0;
                         foreach (var sSlot in SummonerSpellSlots)    //Imeh again
                         {
@@ -189,8 +191,8 @@ namespace ConsoleApplication12
                             }
 
 
-
-                            Sprite.Begin();
+                        #region shitty code
+                        Sprite.Begin();
                             switch (spell.Name)
                             {//shitty code but im to tired
                                 case "summonerodingarrison":
@@ -234,6 +236,7 @@ namespace ConsoleApplication12
                                     Sprite.Draw(summonerbarrier, new ColorBGRA(255, 255, 255, 255), new SharpDX.Rectangle(0, 24 * n, 24, 24), new Vector3(x - 2, y - 7 - z, 0));
                                     break;
                             }
+                        #endregion
                             Sprite.End();
                             z = 24;
                         } //Imeh end 
@@ -269,9 +272,9 @@ namespace ConsoleApplication12
                         hpwidth = Convert.ToInt32(((58f / 100f) * (enemie.Hero.HealthPercentage())));
                         Sprite.Begin(); //DRAW HUD
                         // //ziel:-1617 / -124 //bild 1 -4/-26 55x55
-                        x = x + 23;//fix wege i ha falsch agfange
-                        Sprite.Draw(HUD, new ColorBGRA(255, 255, 255, 255), new SharpDX.Rectangle(1, 0, 62 + 23, 90), new Vector3(x, y, 0), null); //todo add % value for heigh 
-                        x = x - 23;//fix wege i ha falsch agfange
+                        x = x + 23+10;//fix wege i ha falsch agfange
+                        Sprite.Draw(HUD, new ColorBGRA(255, 255, 255, 255), new SharpDX.Rectangle(1, 0, 62 + 23+10, 90), new Vector3(x, y, 0), null); //todo add % value for heigh 
+                        x = x - 23-10;//fix wege i ha falsch agfange
                         Sprite.End();
                         // //draw level  weiss =    248-248-255
                         small.DrawText(null, enemie.Hero.Level.ToString(), (int)x * -1 + 48, (int)y * -1 + 52, new ColorBGRA(248, 248, 255, 255));
@@ -304,11 +307,26 @@ namespace ConsoleApplication12
                             small.DrawText(null, Mana, (int)x * -1 + 2 + Manalength, (int)y * -1 + 65 + 14,
                                 new ColorBGRA(248, 248, 255, 255));
                         }
-                        else
+                        x = x + 10 + 24;
+                        int minionlength = 0;
+
+                        switch (enemie.Hero.MinionsKilled.ToString().Length)
                         {
+                            case 1:
+                                minionlength = 15;
+                                break;
 
+                            case 2:
+                                minionlength = 12;
+                                break;
+
+                            case 3:
+                                minionlength = 10;
+                                break;
                         }
-
+                         //   int minonlength = (31 - (enemie.Hero.MinionsKilled.ToString().Length * 3) / 2); //to center t
+                        small.DrawText(null, enemie.Hero.MinionsKilled.ToString(), (int)x * -1 + minionlength, (int)y * -1 + 62, new ColorBGRA(248, 248, 255, 255));
+                        x = x - 10 - 24;
                         //draw HP/MAXHP 
 
                         Sprite.Begin();
@@ -318,7 +336,7 @@ namespace ConsoleApplication12
                         if (!enemie.Hero.IsVisible || enemie.Hero.IsDead)//make it black :)
                         {
                             Sprite.Begin(); //DRAW icon 255, 255, 255, 255
-                            Sprite.Draw(blackTexture, new ColorBGRA(255, 255, 255, 110), null, new Vector3(x+24, y, 0), null);
+                            Sprite.Draw(blackTexture, new ColorBGRA(255, 255, 255, 110), null, new Vector3(x+24+10, y, 0), null);
                             Sprite.End();
                         }
 
@@ -335,13 +353,16 @@ namespace ConsoleApplication12
                         //}
                         //todo ping on  enemie.Hero.ServerPosition
                       //  Print(enemie.Hero.MinionsKilled.ToString());
-                        x = x + 23;
+                        x = x + 23 + 10;
                         y = y - 94;
                         zahler++;
-
+                     
                     }
                 }
-                    if (Leftbar.Item("Activate").GetValue<bool>())
+               
+
+                #region leftsidebar
+                if (Leftbar.Item("Activate").GetValue<bool>())
                     {
                         x = Leftbar.Item("offX").GetValue<Slider>().Value-50;
                         y = Leftbar.Item("offY").GetValue<Slider>().Value-50 ;
@@ -420,15 +441,15 @@ namespace ConsoleApplication12
                             y=y -48-Leftbar.Item("Distance").GetValue<Slider>().Value;
                         }
                     }
+                #endregion
 
 
 
-              
             }
             catch
             {
 
-            }
+            }  
         }
 
         //TheSaltyWaffle Universal Minimaphack (fetching Champion Icons)
