@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
@@ -14,7 +15,7 @@ namespace daYMANs_Hotkeylevler
         private static Menu menu;
         private static int lastlevel;
         private static Boolean sequenceset = false;
-        private static string nextlevelup;
+        private static string nextlevelup,draw;
         private static float timeset;
         private static Obj_AI_Hero hero
         {
@@ -38,6 +39,9 @@ namespace daYMANs_Hotkeylevler
             menu.AddItem(new MenuItem("W", "W").SetValue(new KeyBind(87, KeyBindType.Press)));
             menu.AddItem(new MenuItem("E", "E").SetValue(new KeyBind(69, KeyBindType.Press)));
             menu.AddItem(new MenuItem("R", "R").SetValue(new KeyBind(82, KeyBindType.Press)));
+            menu.AddItem(new MenuItem("Color", "Color for the Information")).SetValue(new Circle(true, Color.White));
+            menu.AddItem(new MenuItem("offX3", "Positon X").SetValue(new Slider((int)(Drawing.Width*0.75f), 0, Drawing.Width)));
+            menu.AddItem(new MenuItem("offY3", "Positon Y").SetValue(new Slider(10, 0, Drawing.Height)));
             menu.AddToMainMenu();
             Print("Loaded!");
             lastlevel = hero.Level;
@@ -88,11 +92,8 @@ namespace daYMANs_Hotkeylevler
                 {
                     sequenceset = true;
                     nextlevelup = "q";
-                    if (menu.Item("writeinfo").GetValue<bool>())
-                    {
-                        Print("Your Q will get upgraded at Level:" + (hero.Level + 1));
-                        timeset = Game.Time;
-                    }
+                    timeset = Game.Time;
+
                 }
                 if (menu.Item("hootkey").GetValue<KeyBind>().Active && menu.Item("W").GetValue<KeyBind>().Active &&
                     timeset + 0.5f < Game.Time)
@@ -100,10 +101,7 @@ namespace daYMANs_Hotkeylevler
                     sequenceset = true;
                     nextlevelup = "w";
                     timeset = Game.Time;
-                    if (menu.Item("writeinfo").GetValue<bool>())
-                    {
-                        Print("Your W will get upgraded at Level:" + (hero.Level + 1));
-                    }
+
                 }
                 if (menu.Item("hootkey").GetValue<KeyBind>().Active && menu.Item("E").GetValue<KeyBind>().Active &&
                     timeset + 0.5f < Game.Time)
@@ -111,21 +109,29 @@ namespace daYMANs_Hotkeylevler
                     sequenceset = true;
                     nextlevelup = "e";
                     timeset = Game.Time;
-                    if (menu.Item("writeinfo").GetValue<bool>())
-                    {
-                        Print("Your E will get upgraded at Level:" + (hero.Level + 1));
-                    }
+
                 }
                 if (menu.Item("hootkey").GetValue<KeyBind>().Active && menu.Item("R").GetValue<KeyBind>().Active &&
                     timeset + 0.5f < Game.Time)
                 {
                     sequenceset = true;
                     nextlevelup = "r";
-                    timeset = Game.Time;
-                    if (menu.Item("writeinfo").GetValue<bool>())
+                    timeset = Game.Time; 
+                }
+                if (menu.Item("writeinfo").GetValue<bool>())
+                {
+                    if (sequenceset)
                     {
-                        Print("Your R will get upgraded at Level:" + (hero.Level + 1));
+                        draw = nextlevelup.ToUpper();
                     }
+                    else
+                    {
+                        {
+                            draw = "not set";
+                        }
+                    }
+                    Drawing.DrawText(menu.Item("offX3").GetValue<Slider>().Value, menu.Item("offY3").GetValue<Slider>().Value, menu.Item("Color").GetValue<Circle>().Color, draw);
+                 
                 }
             }
         }
