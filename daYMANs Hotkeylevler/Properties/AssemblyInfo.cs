@@ -5,11 +5,11 @@ using System.Runtime.InteropServices;
 // Allgemeine Informationen über eine Assembly werden über die folgenden 
 // Attribute gesteuert. Ändern Sie diese Attributwerte, um die Informationen zu ändern,
 // die mit einer Assembly verknüpft sind.
-[assembly: AssemblyTitle("ConsoleApplication12")]
+[assembly: AssemblyTitle("daYMANs Hotkeylevler")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
-[assembly: AssemblyProduct("ConsoleApplication12")]
+[assembly: AssemblyProduct("daYMANs Hotkeylevler")]
 [assembly: AssemblyCopyright("Copyright ©  2014")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
@@ -20,7 +20,7 @@ using System.Runtime.InteropServices;
 [assembly: ComVisible(false)]
 
 // Die folgende GUID bestimmt die ID der Typbibliothek, wenn dieses Projekt für COM verfügbar gemacht wird
-[assembly: Guid("02332b99-9b06-4f45-bb97-7e65442cde79")]
+[assembly: Guid("176324db-78e5-408e-bb8e-7ef9a466627b")]
 
 // Versionsinformationen für eine Assembly bestehen aus den folgenden vier Werten:
 //
