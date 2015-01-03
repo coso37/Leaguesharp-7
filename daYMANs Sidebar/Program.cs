@@ -56,6 +56,7 @@ namespace ConsoleApplication12
         private static Texture temp, summonerheal, summonerbarrier, summonerboost, summonerclairvoyance, summonerdot, summonerexhaust, summonerflash, summonerhaste, summonermana, summonerodingarrison, summonerrevive, summonersmite, summonerteleport;
         private static void Main(string[] args)
         {
+            #region load images/fonts
             Sprite = new Sprite(Render.Device);
             HUDult = Texture.FromMemory(Drawing.Direct3DDevice, (byte[])new ImageConverter().ConvertTo(Resources.HUDult, typeof(byte[])), 16, 16, 0, Usage.None, Format.A1, Pool.Managed, Filter.Default, Filter.Default, 0);
             blackTexture = Texture.FromMemory(Drawing.Direct3DDevice, (byte[])new ImageConverter().ConvertTo(Resources.schwarz, typeof(byte[])), 62 + 24+10, 90, 0, Usage.None, Format.A1, Pool.Managed, Filter.Default, Filter.Default, 0);
@@ -100,6 +101,13 @@ namespace ConsoleApplication12
                 OutputPrecision = FontPrecision.Default,
                 Quality = FontQuality.Default
             });
+            #endregion 
+            #region thread for image download
+
+         //   Thread newThread = new Thread(Program.LoadImages);
+           // newThread.Start();
+
+            #endregion
             CustomEvents.Game.OnGameLoad += Game_OnGameLoad;
         }
 
@@ -133,7 +141,9 @@ namespace ConsoleApplication12
             }//funtzt
             if (!string.IsNullOrEmpty(_version))
             {
-                LoadImages();
+                Thread newThread = new Thread(LoadImages);
+                newThread.Start();
+                //LoadImages();
                 Print("Loaded! ");
                 Drawing.OnPostReset += DrawingOnPostReset;
                 Drawing.OnPreReset += DrawingOnPreReset;
@@ -163,8 +173,10 @@ namespace ConsoleApplication12
                 return;
             try
             {
+                #region right
                 if (SidebarMenu.Item("Activate").GetValue<bool>()) //drawHUD
                 {
+                    
                     x = -Width + ((62 + 24+10) * scale);
                     y = Height * -.10f;
                     int zahler = 0;
@@ -359,7 +371,7 @@ namespace ConsoleApplication12
                      
                     }
                 }
-               
+                    #endregion
 
                 #region leftsidebar
                 if (Leftbar.Item("Activate").GetValue<bool>())
@@ -382,7 +394,7 @@ namespace ConsoleApplication12
                                 {
 
                                     medium.DrawText(
-                                        null, s, Convert.ToInt32(-x + 12), Convert.ToInt32(-y + 7 + z),
+                                        null, s, Convert.ToInt32(-x + 2), Convert.ToInt32(-y + 7 + z),
                                         new ColorBGRA(255, 255, 255, 255));
                                 }
 
