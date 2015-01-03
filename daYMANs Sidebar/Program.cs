@@ -132,7 +132,6 @@ namespace ConsoleApplication12
 
             var attempt = 0;
             _version = GameVersion();
-            Print(_version);
             while (string.IsNullOrEmpty(_version) && attempt < 5)
             {
                 _version = GameVersion();
