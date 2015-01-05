@@ -121,8 +121,8 @@ namespace ConsoleApplication12
             SidebarMenu = new Menu("sidebar", "sidebar", true);
             Leftbar = new Menu("sidebar", "Left sidebar", false);
             Leftbar.AddItem(new MenuItem("Activate", "Activate")).SetValue(true);
-            Leftbar.AddItem(new MenuItem("offX", "Offset for width").SetValue(new Slider(0, -50, 50)));
-            Leftbar.AddItem(new MenuItem("offY", "Offset for height").SetValue(new Slider(0, -100, 100)));
+            Leftbar.AddItem(new MenuItem("offX5", "Offset for width").SetValue(new Slider(0, -80, 80)));
+            Leftbar.AddItem(new MenuItem("offY5", "Offset for height").SetValue(new Slider(0, -200, 200)));
             Leftbar.AddItem(new MenuItem("Distance", "Distance").SetValue(new Slider(0, -50, 50)));
             SidebarMenu.AddSubMenu(Leftbar);
             SidebarMenu.AddItem(new MenuItem("Activate", "Activate")).SetValue(true);
@@ -166,6 +166,55 @@ namespace ConsoleApplication12
             Sprite.OnLostDevice();
         }
 
+        static void drawSummoner(float x, float y,string spellname,int n,int z)
+        {
+                 Sprite.Begin();
+                            switch (spellname)
+                            {//shitty code but im to tired
+                                case "summonerodingarrison":
+                                    Sprite.Draw(summonerodingarrison, new ColorBGRA(255, 255, 255, 255), new SharpDX.Rectangle(0, 24 * n, 24, 24), new Vector3(x, y- z, 0));
+                                    break;
+                                case "summonerrevive":
+                                    Sprite.Draw(summonerrevive, new ColorBGRA(255, 255, 255, 255), new SharpDX.Rectangle(0, 24 * n, 24, 24), new Vector3(x , y  - z, 0));
+
+                                    break;
+                                case "summonerclairvoyance":
+                                    Sprite.Draw(summonerclairvoyance, new ColorBGRA(255, 255, 255, 255), new SharpDX.Rectangle(0, 24 * n, 24, 24), new Vector3(x , y - z, 0));
+                                    break;
+                                case "summonerboost":
+                                    Sprite.Draw(summonerboost, new ColorBGRA(255, 255, 255, 255), new SharpDX.Rectangle(0, 24 * n, 24, 24), new Vector3(x , y -z, 0));
+                                    break;
+                                case "summonermana":
+                                    Sprite.Draw(summonermana, new ColorBGRA(255, 255, 255, 255), new SharpDX.Rectangle(0, 24 * n, 24, 24), new Vector3(x , y - z, 0));
+                                    break;
+                                case "summonerteleport":
+                                    Sprite.Draw(summonerteleport, new ColorBGRA(255, 255, 255, 255), new SharpDX.Rectangle(0, 24 * n, 24, 24), new Vector3(x, y - z, 0));
+                                    break;
+                                case "summonerheal":
+                                    Sprite.Draw(summonerheal, new ColorBGRA(255, 255, 255, 255), new SharpDX.Rectangle(0, 24 * n, 24, 24), new Vector3(x , y - z, 0));
+                                    break;
+                                case "summonerexhaust":
+                                    Sprite.Draw(summonerexhaust, new ColorBGRA(255, 255, 255, 255), new SharpDX.Rectangle(0, 24 * n, 24, 24), new Vector3(x , y - z, 0));
+                                    break;
+                                case "summonersmite":
+                                    Sprite.Draw(summonersmite, new ColorBGRA(255, 255, 255, 255), new SharpDX.Rectangle(0, 24 * n, 24, 24), new Vector3(x , y - z, 0));
+                                    break;
+                                case "summonerdot":
+                                    Sprite.Draw(summonerdot, new ColorBGRA(255, 255, 255, 255), new SharpDX.Rectangle(0, 24 * n, 24, 24), new Vector3(x , y - z, 0));
+                                    break;
+                                case "summonerhaste":
+                                    Sprite.Draw(summonerhaste, new ColorBGRA(255, 255, 255, 255), new SharpDX.Rectangle(0, 24 * n, 24, 24), new Vector3(x , y - z, 0));
+                                    break;
+                                case "summonerflash":
+                                    Sprite.Draw(summonerflash, new ColorBGRA(255, 255, 255, 255), new SharpDX.Rectangle(0, 24 * n, 24, 24), new Vector3(x , y - z, 0));
+                                    break;
+                                default:
+                                    Sprite.Draw(summonerbarrier, new ColorBGRA(255, 255, 255, 255), new SharpDX.Rectangle(0, 24 * n, 24, 24), new Vector3(x, y - z, 0));
+                                    break;
+                            }
+                        
+                            Sprite.End();
+        }
         static void Drawing_OnDraw(EventArgs args)
         {
             if (Drawing.Direct3DDevice == null || Drawing.Direct3DDevice.IsDisposed)
@@ -204,7 +253,7 @@ namespace ConsoleApplication12
 
                         #region shitty code
                         Sprite.Begin();
-                            switch (spell.Name)
+                            switch (spell.Name.ToLower())
                             {//shitty code but im to tired
                                 case "summonerodingarrison":
                                     Sprite.Draw(summonerodingarrison, new ColorBGRA(255, 255, 255, 255), new SharpDX.Rectangle(0, 24 * n, 24, 24), new Vector3(x - 2, y - 7 - z, 0));
@@ -231,8 +280,8 @@ namespace ConsoleApplication12
                                 case "summonerexhaust":
                                     Sprite.Draw(summonerexhaust, new ColorBGRA(255, 255, 255, 255), new SharpDX.Rectangle(0, 24 * n, 24, 24), new Vector3(x - 2, y - 7 - z, 0));
                                     break;
-                                case "summonersmite":
-                                    Sprite.Draw(summonersmite, new ColorBGRA(255, 255, 255, 255), new SharpDX.Rectangle(0, 24 * n, 24, 24), new Vector3(x - 2, y - 7 - z, 0));
+                                case "summonerbarrier":
+                                    Sprite.Draw(summonerbarrier, new ColorBGRA(255, 255, 255, 255), new SharpDX.Rectangle(0, 24 * n, 24, 24), new Vector3(x - 2, y - 7 - z, 0));
                                     break;
                                 case "summonerdot":
                                     Sprite.Draw(summonerdot, new ColorBGRA(255, 255, 255, 255), new SharpDX.Rectangle(0, 24 * n, 24, 24), new Vector3(x - 2, y - 7 - z, 0));
@@ -244,7 +293,7 @@ namespace ConsoleApplication12
                                     Sprite.Draw(summonerflash, new ColorBGRA(255, 255, 255, 255), new SharpDX.Rectangle(0, 24 * n, 24, 24), new Vector3(x - 2, y - 7 - z, 0));
                                     break;
                                 default:
-                                    Sprite.Draw(summonerbarrier, new ColorBGRA(255, 255, 255, 255), new SharpDX.Rectangle(0, 24 * n, 24, 24), new Vector3(x - 2, y - 7 - z, 0));
+                                    Sprite.Draw(summonersmite, new ColorBGRA(255, 255, 255, 255), new SharpDX.Rectangle(0, 24 * n, 24, 24), new Vector3(x - 2, y - 7 - z, 0));
                                     break;
                             }
                         #endregion
@@ -318,10 +367,10 @@ namespace ConsoleApplication12
                             small.DrawText(null, Mana, (int)x * -1 + 2 + Manalength, (int)y * -1 + 65 + 14,
                                 new ColorBGRA(248, 248, 255, 255));
                         }
-                        x = x + 10 + 24;
+                   
                         int minionlength = 0;
 
-                        switch (enemie.Hero.MinionsKilled.ToString().Length)
+                        switch (enemie.Hero.MinionsKilled.ToString().Length)// zentriere
                         {
                             case 1:
                                 minionlength = 15;
@@ -335,8 +384,8 @@ namespace ConsoleApplication12
                                 minionlength = 10;
                                 break;
                         }
-                         //   int minonlength = (31 - (enemie.Hero.MinionsKilled.ToString().Length * 3) / 2); //to center t
-                        small.DrawText(null, enemie.Hero.MinionsKilled.ToString(), (int)x * -1 + minionlength, (int)y * -1 + 62, new ColorBGRA(248, 248, 255, 255));
+                        x = x + 10 + 24;
+                        small.DrawText(null, enemie.Hero.MinionsKilled.ToString(), (int)x * -1+  minionlength, (int)y * -1 + 62, new ColorBGRA(248, 248, 255, 255));
                         x = x - 10 - 24;
                         //draw HP/MAXHP 
 
@@ -375,8 +424,8 @@ namespace ConsoleApplication12
                 #region leftsidebar
                 if (Leftbar.Item("Activate").GetValue<bool>())
                     {
-                        x = Leftbar.Item("offX").GetValue<Slider>().Value-50;
-                        y = Leftbar.Item("offY").GetValue<Slider>().Value-50 ;
+                        x = Leftbar.Item("offX5").GetValue<Slider>().Value-50;
+                        y = Leftbar.Item("offY5").GetValue<Slider>().Value-50 ;
                         foreach (Obj_AI_Hero herosHero in ObjectManager.Get<Obj_AI_Hero>().Where(herosHero => herosHero != null && herosHero.Team == ObjectManager.Player.Team && hero.IsValid && herosHero.Name != hero.Name))
                         {
                             int z = 0;
@@ -401,7 +450,7 @@ namespace ConsoleApplication12
                                 
                                 Sprite.Begin();
                                 #region dont look at this shit STOP
-                                switch (spell.Name)
+                                switch (spell.Name.ToLower())
                                 {//shitty code but im to tired
                                     case "summonerodingarrison":
                                         Sprite.Draw(summonerodingarrison, new ColorBGRA(255, 255, 255, 255), new SharpDX.Rectangle(0, 24 * n, 24, 24), new Vector3(x - 2, y - 7 - z, 0));
@@ -440,8 +489,11 @@ namespace ConsoleApplication12
                                     case "summonerflash":
                                         Sprite.Draw(summonerflash, new ColorBGRA(255, 255, 255, 255), new SharpDX.Rectangle(0, 24 * n, 24, 24), new Vector3(x - 2, y - 7 - z, 0));
                                         break;
-                                    default:
+                                    case "summonerbarrier":
                                         Sprite.Draw(summonerbarrier, new ColorBGRA(255, 255, 255, 255), new SharpDX.Rectangle(0, 24 * n, 24, 24), new Vector3(x - 2, y - 7 - z, 0));
+                                        break;
+                                    default:
+                                        Sprite.Draw(summonersmite, new ColorBGRA(255, 255, 255, 255), new SharpDX.Rectangle(0, 24 * n, 24, 24), new Vector3(x - 2, y - 7 - z, 0));
                                         break;
                                 }
                                 #endregion
@@ -511,11 +563,7 @@ namespace ConsoleApplication12
             }
         }
 
-        private float GetScale()
-        {
-            // return _slider.GetValue<Slider>().Value / 100f;
-            return 1;
-        }
+
 
         private static Bitmap DownloadImage(string champName)
         {
