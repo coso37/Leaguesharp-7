@@ -119,8 +119,8 @@ namespace ConsoleApplication12
         private static void Game_OnGameLoad(EventArgs args)
         {
             SidebarMenu = new Menu("sidebar", "sidebar", true);
-            Leftbar = new Menu("sidebar", "Left sidebar", false);
-            Leftbar.AddItem(new MenuItem("Activate", "Activate")).SetValue(true);
+            Leftbar = new Menu("Allie Sidebar", "Left sidebar", false);
+            Leftbar.AddItem(new MenuItem("Activate2", "Activate")).SetValue(true);
             Leftbar.AddItem(new MenuItem("offX5", "Offset for width").SetValue(new Slider(0, -80, 80)));
             Leftbar.AddItem(new MenuItem("offY5", "Offset for height").SetValue(new Slider(0, -200, 200)));
             Leftbar.AddItem(new MenuItem("Distance", "Distance").SetValue(new Slider(0, -50, 50)));
@@ -142,7 +142,6 @@ namespace ConsoleApplication12
             {
                 Thread newThread = new Thread(LoadImages);
                 newThread.Start();
-                //LoadImages();
                 Print("Loaded! ");
                 Drawing.OnPostReset += DrawingOnPostReset;
                 Drawing.OnPreReset += DrawingOnPreReset;
@@ -166,54 +165,38 @@ namespace ConsoleApplication12
             Sprite.OnLostDevice();
         }
 
-        static void drawSummoner(float x, float y,string spellname,int n,int z)
+        static Texture summonerTexture(string spellname)
         {
-                 Sprite.Begin();
-                            switch (spellname)
-                            {//shitty code but im to tired
-                                case "summonerodingarrison":
-                                    Sprite.Draw(summonerodingarrison, new ColorBGRA(255, 255, 255, 255), new SharpDX.Rectangle(0, 24 * n, 24, 24), new Vector3(x, y- z, 0));
-                                    break;
-                                case "summonerrevive":
-                                    Sprite.Draw(summonerrevive, new ColorBGRA(255, 255, 255, 255), new SharpDX.Rectangle(0, 24 * n, 24, 24), new Vector3(x , y  - z, 0));
+            switch (spellname.ToLower())
+            {//shitty code but im to tired
+                case "summonerodingarrison":
+                    return summonerodingarrison;                    
+                case "summonerrevive":
+                    return summonerrevive;
+                case "summonerclairvoyance":
+                    return summonerclairvoyance;
+                case "summonerboost":
+                    return summonerboost;
+                case "summonermana":
+                    return summonermana;
+                case "summonerteleport":
+                    return summonerteleport;
+                case "summonerheal":
+                    return summonerheal;
+                case "summonerexhaust":
+                    return summonerexhaust;
+                case "summonersmite":
+                    return summonersmite;
+                case "summonerdot":
+                    return summonerdot; 
+                case "summonerhaste":
+                    return summonerhaste;
+                case "summonerflash":
+                    return summonerflash;
+                default:
+                    return summonerbarrier;
+            }
 
-                                    break;
-                                case "summonerclairvoyance":
-                                    Sprite.Draw(summonerclairvoyance, new ColorBGRA(255, 255, 255, 255), new SharpDX.Rectangle(0, 24 * n, 24, 24), new Vector3(x , y - z, 0));
-                                    break;
-                                case "summonerboost":
-                                    Sprite.Draw(summonerboost, new ColorBGRA(255, 255, 255, 255), new SharpDX.Rectangle(0, 24 * n, 24, 24), new Vector3(x , y -z, 0));
-                                    break;
-                                case "summonermana":
-                                    Sprite.Draw(summonermana, new ColorBGRA(255, 255, 255, 255), new SharpDX.Rectangle(0, 24 * n, 24, 24), new Vector3(x , y - z, 0));
-                                    break;
-                                case "summonerteleport":
-                                    Sprite.Draw(summonerteleport, new ColorBGRA(255, 255, 255, 255), new SharpDX.Rectangle(0, 24 * n, 24, 24), new Vector3(x, y - z, 0));
-                                    break;
-                                case "summonerheal":
-                                    Sprite.Draw(summonerheal, new ColorBGRA(255, 255, 255, 255), new SharpDX.Rectangle(0, 24 * n, 24, 24), new Vector3(x , y - z, 0));
-                                    break;
-                                case "summonerexhaust":
-                                    Sprite.Draw(summonerexhaust, new ColorBGRA(255, 255, 255, 255), new SharpDX.Rectangle(0, 24 * n, 24, 24), new Vector3(x , y - z, 0));
-                                    break;
-                                case "summonersmite":
-                                    Sprite.Draw(summonersmite, new ColorBGRA(255, 255, 255, 255), new SharpDX.Rectangle(0, 24 * n, 24, 24), new Vector3(x , y - z, 0));
-                                    break;
-                                case "summonerdot":
-                                    Sprite.Draw(summonerdot, new ColorBGRA(255, 255, 255, 255), new SharpDX.Rectangle(0, 24 * n, 24, 24), new Vector3(x , y - z, 0));
-                                    break;
-                                case "summonerhaste":
-                                    Sprite.Draw(summonerhaste, new ColorBGRA(255, 255, 255, 255), new SharpDX.Rectangle(0, 24 * n, 24, 24), new Vector3(x , y - z, 0));
-                                    break;
-                                case "summonerflash":
-                                    Sprite.Draw(summonerflash, new ColorBGRA(255, 255, 255, 255), new SharpDX.Rectangle(0, 24 * n, 24, 24), new Vector3(x , y - z, 0));
-                                    break;
-                                default:
-                                    Sprite.Draw(summonerbarrier, new ColorBGRA(255, 255, 255, 255), new SharpDX.Rectangle(0, 24 * n, 24, 24), new Vector3(x, y - z, 0));
-                                    break;
-                            }
-                        
-                            Sprite.End();
         }
         static void Drawing_OnDraw(EventArgs args)
         {
@@ -228,7 +211,6 @@ namespace ConsoleApplication12
                     x = -Width + ((62 + 24+10) * scale);
                     y = Height * -.10f;
                     int zahler = 0;
-                    String timetorespawn;
                     foreach (var enemie in enemyList)
                     {
                         x = x - 10;
@@ -250,55 +232,15 @@ namespace ConsoleApplication12
                                     new ColorBGRA(255, 255, 255, 255));
                             }
 
-
-                        #region shitty code
+                            
                         Sprite.Begin();
-                            switch (spell.Name.ToLower())
-                            {//shitty code but im to tired
-                                case "summonerodingarrison":
-                                    Sprite.Draw(summonerodingarrison, new ColorBGRA(255, 255, 255, 255), new SharpDX.Rectangle(0, 24 * n, 24, 24), new Vector3(x - 2, y - 7 - z, 0));
-                                    break;
-                                case "summonerrevive":
-                                    Sprite.Draw(summonerrevive, new ColorBGRA(255, 255, 255, 255), new SharpDX.Rectangle(0, 24 * n, 24, 24), new Vector3(x - 2, y - 7 - z, 0));
+                      Sprite.Draw(summonerTexture(spell.Name), new ColorBGRA(255, 255, 255, 255), new SharpDX.Rectangle(0, 24 * n, 24, 24), new Vector3(x - 2, y - 7 - z, 0));
+                        Sprite.End();
 
-                                    break;
-                                case "summonerclairvoyance":
-                                    Sprite.Draw(summonerclairvoyance, new ColorBGRA(255, 255, 255, 255), new SharpDX.Rectangle(0, 24 * n, 24, 24), new Vector3(x - 2, y - 7 - z, 0));
-                                    break;
-                                case "summonerboost":
-                                    Sprite.Draw(summonerboost, new ColorBGRA(255, 255, 255, 255), new SharpDX.Rectangle(0, 24 * n, 24, 24), new Vector3(x - 2, y - 7 - z, 0));
-                                    break;
-                                case "summonermana":
-                                    Sprite.Draw(summonermana, new ColorBGRA(255, 255, 255, 255), new SharpDX.Rectangle(0, 24 * n, 24, 24), new Vector3(x - 2, y - 7 - z, 0));
-                                    break;
-                                case "summonerteleport":
-                                    Sprite.Draw(summonerteleport, new ColorBGRA(255, 255, 255, 255), new SharpDX.Rectangle(0, 24 * n, 24, 24), new Vector3(x, y - 7 - z, 0));
-                                    break;
-                                case "summonerheal":
-                                    Sprite.Draw(summonerheal, new ColorBGRA(255, 255, 255, 255), new SharpDX.Rectangle(0, 24 * n, 24, 24), new Vector3(x - 2, y - 7 - z, 0));
-                                    break;
-                                case "summonerexhaust":
-                                    Sprite.Draw(summonerexhaust, new ColorBGRA(255, 255, 255, 255), new SharpDX.Rectangle(0, 24 * n, 24, 24), new Vector3(x - 2, y - 7 - z, 0));
-                                    break;
-                                case "summonerbarrier":
-                                    Sprite.Draw(summonerbarrier, new ColorBGRA(255, 255, 255, 255), new SharpDX.Rectangle(0, 24 * n, 24, 24), new Vector3(x - 2, y - 7 - z, 0));
-                                    break;
-                                case "summonerdot":
-                                    Sprite.Draw(summonerdot, new ColorBGRA(255, 255, 255, 255), new SharpDX.Rectangle(0, 24 * n, 24, 24), new Vector3(x - 2, y - 7 - z, 0));
-                                    break;
-                                case "summonerhaste":
-                                    Sprite.Draw(summonerhaste, new ColorBGRA(255, 255, 255, 255), new SharpDX.Rectangle(0, 24 * n, 24, 24), new Vector3(x - 2, y - 7 - z, 0));
-                                    break;
-                                case "summonerflash":
-                                    Sprite.Draw(summonerflash, new ColorBGRA(255, 255, 255, 255), new SharpDX.Rectangle(0, 24 * n, 24, 24), new Vector3(x - 2, y - 7 - z, 0));
-                                    break;
-                                default:
-                                    Sprite.Draw(summonersmite, new ColorBGRA(255, 255, 255, 255), new SharpDX.Rectangle(0, 24 * n, 24, 24), new Vector3(x - 2, y - 7 - z, 0));
-                                    break;
-                            }
-                        #endregion
-                            Sprite.End();
                             z = 24;
+
+                            #endregion
+
                         } //Imeh end 
                         x = x - 23;//fix wege i ha falsch agfange
 
@@ -314,7 +256,7 @@ namespace ConsoleApplication12
                         }
                         else if (enemie.Hero.IsDead && (respawntime[zahler] > Game.ClockTime))
                         {
-                            timetorespawn = (Math.Round(respawntime[zahler] - Game.ClockTime)).ToString();
+                            String timetorespawn = (Math.Round(respawntime[zahler] - Game.ClockTime)).ToString();
                             if (timetorespawn.Length == 1)
                             {
                                 respawnfont.DrawText(null, timetorespawn,(int)x * -1 + 21,(int)y * -1 + 13,new ColorBGRA(248, 248, 255, 255));
@@ -400,31 +342,27 @@ namespace ConsoleApplication12
                             Sprite.End();
                         }
 
-                        //if (enemie.Hero.Health < 350 && ((int)hero.Spellbook.GetSpell(SpellSlot.R).SData.CastRange.GetValue(0)) < 5000 && enemie.Hero.ServerPosition.Distance(hero.ServerPosition) < (int)hero.Spellbook.GetSpell(SpellSlot.R).SData.CastRange.GetValue(0) && hero.Spellbook.GetSpell(SpellSlot.R).Cooldown.Equals(0)&&hero.Level>=6)
-                        //{
-                        //  Print("mach ult");
-                        //  //todo ping on  enemie.Hero.ServerPosition
-                        //  {
-                        //      Packet.S2C.Ping.Encoded(new Packet.S2C.Ping.Struct(enemie.Hero.Position.X, enemie.Hero.Position.Y,
-                        //      enemie.Hero.NetworkId,
-                        //      ObjectManager.Player.NetworkId, Packet.PingType.Danger)).Process();
-                        //  }
+                        if (enemie.Hero.Health < 350&&!enemie.Hero.IsDead)//eventuell && (int)hero.Spellbook.GetSpell(SpellSlot.R).SData.CastRange.GetValue(0) < 5000 && enemie.Hero.ServerPosition.Distance(hero.ServerPosition) < (int)hero.Spellbook.GetSpell(SpellSlot.R).SData.CastRange.GetValue(0) && hero.Spellbook.GetSpell(SpellSlot.R).Cooldown.Equals(0) && hero.Level >= 6)
                          
-                        //}
-                        //todo ping on  enemie.Hero.ServerPosition
-                      //  Print(enemie.Hero.MinionsKilled.ToString());
+                        {
+                          //todo ping on  enemie.Hero.ServerPosition
+                          {
+
+                          //    LeagueSharp.Network..S2C.Ping.Encoded(new Packet.S2C.Ping.Struct(enemie.Hero.Position.X, enemie.Hero.Position.Y,enemie.Hero.NetworkId,ObjectManager.Player.NetworkId, Packet.PingType.Danger)).Process();
+                          }
+
+                        }
                         x = x + 23 + 10;
                         y = y - 94;
                         zahler++;
                      
                     }
                 }
-                    #endregion
 
                 #region leftsidebar
-                if (Leftbar.Item("Activate").GetValue<bool>())
+                if (Leftbar.Item("Activate2").GetValue<bool>())
                     {
-                        x = Leftbar.Item("offX5").GetValue<Slider>().Value-50;
+                        x = (Leftbar.Item("offX5").GetValue<Slider>().Value*-1)-50;
                         y = Leftbar.Item("offY5").GetValue<Slider>().Value-50 ;
                         foreach (Obj_AI_Hero herosHero in ObjectManager.Get<Obj_AI_Hero>().Where(herosHero => herosHero != null && herosHero.Team == ObjectManager.Player.Team && hero.IsValid && herosHero.Name != hero.Name))
                         {
@@ -442,61 +380,14 @@ namespace ConsoleApplication12
                                 {
 
                                     medium.DrawText(
-                                        null, s, Convert.ToInt32(-x + 2), Convert.ToInt32(-y + 7 + z),
+                                        null, s, Convert.ToInt32(-x + 30), Convert.ToInt32(-y + 10+ z),
                                         new ColorBGRA(255, 255, 255, 255));
                                 }
 
 
-                                
+                               
                                 Sprite.Begin();
-                                #region dont look at this shit STOP
-                                switch (spell.Name.ToLower())
-                                {//shitty code but im to tired
-                                    case "summonerodingarrison":
-                                        Sprite.Draw(summonerodingarrison, new ColorBGRA(255, 255, 255, 255), new SharpDX.Rectangle(0, 24 * n, 24, 24), new Vector3(x - 2, y - 7 - z, 0));
-                                        break;
-                                    case "summonerrevive":
-                                        Sprite.Draw(summonerrevive, new ColorBGRA(255, 255, 255, 255), new SharpDX.Rectangle(0, 24 * n, 24, 24), new Vector3(x - 2, y - 7 - z, 0));
-
-                                        break;
-                                    case "summonerclairvoyance":
-                                        Sprite.Draw(summonerclairvoyance, new ColorBGRA(255, 255, 255, 255), new SharpDX.Rectangle(0, 24 * n, 24, 24), new Vector3(x - 2, y - 7 - z, 0));
-                                        break;
-                                    case "summonerboost":
-                                        Sprite.Draw(summonerboost, new ColorBGRA(255, 255, 255, 255), new SharpDX.Rectangle(0, 24 * n, 24, 24), new Vector3(x - 2, y - 7 - z, 0));
-                                        break;
-                                    case "summonermana":
-                                        Sprite.Draw(summonermana, new ColorBGRA(255, 255, 255, 255), new SharpDX.Rectangle(0, 24 * n, 24, 24), new Vector3(x - 2, y - 7 - z, 0));
-                                        break;
-                                    case "summonerteleport":
-                                        Sprite.Draw(summonerteleport, new ColorBGRA(255, 255, 255, 255), new SharpDX.Rectangle(0, 24 * n, 24, 24), new Vector3(x, y - 7 - z, 0));
-                                        break;
-                                    case "summonerheal":
-                                        Sprite.Draw(summonerheal, new ColorBGRA(255, 255, 255, 255), new SharpDX.Rectangle(0, 24 * n, 24, 24), new Vector3(x - 2, y - 7 - z, 0));
-                                        break;
-                                    case "summonerexhaust":
-                                        Sprite.Draw(summonerexhaust, new ColorBGRA(255, 255, 255, 255), new SharpDX.Rectangle(0, 24 * n, 24, 24), new Vector3(x - 2, y - 7 - z, 0));
-                                        break;
-                                    case "summonersmite":
-                                        Sprite.Draw(summonersmite, new ColorBGRA(255, 255, 255, 255), new SharpDX.Rectangle(0, 24 * n, 24, 24), new Vector3(x - 2, y - 7 - z, 0));
-                                        break;
-                                    case "summonerdot":
-                                        Sprite.Draw(summonerdot, new ColorBGRA(255, 255, 255, 255), new SharpDX.Rectangle(0, 24 * n, 24, 24), new Vector3(x - 2, y - 7 - z, 0));
-                                        break;
-                                    case "summonerhaste":
-                                        Sprite.Draw(summonerhaste, new ColorBGRA(255, 255, 255, 255), new SharpDX.Rectangle(0, 24 * n, 24, 24), new Vector3(x - 2, y - 7 - z, 0));
-                                        break;
-                                    case "summonerflash":
-                                        Sprite.Draw(summonerflash, new ColorBGRA(255, 255, 255, 255), new SharpDX.Rectangle(0, 24 * n, 24, 24), new Vector3(x - 2, y - 7 - z, 0));
-                                        break;
-                                    case "summonerbarrier":
-                                        Sprite.Draw(summonerbarrier, new ColorBGRA(255, 255, 255, 255), new SharpDX.Rectangle(0, 24 * n, 24, 24), new Vector3(x - 2, y - 7 - z, 0));
-                                        break;
-                                    default:
-                                        Sprite.Draw(summonersmite, new ColorBGRA(255, 255, 255, 255), new SharpDX.Rectangle(0, 24 * n, 24, 24), new Vector3(x - 2, y - 7 - z, 0));
-                                        break;
-                                }
-                                #endregion
+                                Sprite.Draw(summonerTexture(spell.Name), new ColorBGRA(255, 255, 255, 255), new SharpDX.Rectangle(0, 24 * n, 24, 24), new Vector3(x - 2, y - 7 - z, 0));
                                 Sprite.End();
                                 z = 24;
                              
@@ -511,7 +402,7 @@ namespace ConsoleApplication12
             }
             catch
             {
-
+                Console.Write("Sidebar crashed at drawing?");
             }  
         }
 
@@ -616,9 +507,6 @@ namespace ConsoleApplication12
 
         private class enemies
         {
-            //public Render.Sprite Image { get; set; }
-            //public Render.Text Text { get; set; }
-            //public Render.Rectangle Rect { get; set; }
             public Obj_AI_Hero Hero { get; set; }
             public Texture Icon { get; set; }
 
