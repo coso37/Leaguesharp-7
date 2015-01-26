@@ -255,7 +255,7 @@ namespace ConsoleApplication12
                         {
                             var spell = enemie.Hero.Spellbook.GetSpell(sSlot);
 
-                            var t = 100;//spell.CooldownExpires - Game.Time
+                            var t = spell.CooldownExpires - Game.Time;
                             var percent = (Math.Abs(spell.Cooldown) > float.Epsilon) ? t / spell.Cooldown : 1f;
                             var n = (t > 0) ? (int)(19 * (1f - percent)) : 19;
                             var ts = TimeSpan.FromSeconds((int)t);
@@ -271,9 +271,11 @@ namespace ConsoleApplication12
                            
                             if (SummonerW.Item("Activate3").GetValue<bool>())
                             {
-                               
+                                var t2 = spell.CooldownExpires;
+                                var ts2 = TimeSpan.FromSeconds((int)t2);
+
                                 var s2 = t > 60
-                                    ? string.Format("{0}{1:D2}", ts.Minutes, ts.Seconds)
+                                    ? string.Format("{0}{1:D2}", ts2.Minutes, ts2.Seconds)
                                     : String.Format("{0:0}", t);
                                 
                                 SharpDX.RectangleF summoner = new SharpDX.RectangleF(-(x - 2), -(y - 7 - z), 24, 24);
@@ -297,8 +299,8 @@ namespace ConsoleApplication12
                                             }
                                             else
                                             {
-                                                Game.Say(nickname(enemie.Hero.BaseSkinName) + " " +
-                                                         realSummoner(spell.Name) + " " + "down");
+                                                Game.Say(nickname(enemie.Hero.BaseSkinName) + "has no" +
+                                                         realSummoner(spell.Name));
                                             }
 
                                         }
@@ -307,7 +309,7 @@ namespace ConsoleApplication12
                                     //     lastsay = Game.Time;
                                       //    doublepress = false;
                                    
-                           /// Game.Say(nickname(enemie.Hero.BaseSkinName)+ " no summoner");
+                           // Game.Say(nickname(enemie.Hero.BaseSkinName)+ " no summoner");
                               //          }
                                     }
                                  
@@ -554,7 +556,7 @@ namespace ConsoleApplication12
                 case "Janna":
                     return p.ToLower();
                 case "JarvanIV":
-                    return "jarvan";
+                    return "j4";
                 case "Jayce":
                     return p.ToLower();
                 case "Karma":
