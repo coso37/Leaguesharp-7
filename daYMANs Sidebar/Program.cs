@@ -8,6 +8,7 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Reflection;
+using System.Runtime.Remoting.Messaging;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Web;
@@ -23,7 +24,10 @@ namespace ConsoleApplication12
 {
     internal class Program
     {
-        public static Menu SidebarMenu, Leftbar;
+        public static Boolean doublepress;
+        public static float lastsay, lastclick;
+        public static Vector2 lastpositon;
+        public static Menu SidebarMenu, Leftbar, SummonerW;
         private static readonly IList<enemies> enemyList = new List<enemies>();
         private static string _version;
         private static Sprite Sprite;
@@ -47,11 +51,12 @@ namespace ConsoleApplication12
         {
             "Akali", "Kennen", "LeeSin", "Shen", "Zed","Gnar","Katarina","RekSai","Renekton","Rengar","Rumble",
         };
+
         private static int hpwidth = 0;
         private static float Height = Drawing.Height;
         private static float Width = Drawing.Width;
         private static int scale = 1;
-        static SharpDX.Direct3D9.Font small, respawnfont,medium;
+        static SharpDX.Direct3D9.Font small, respawnfont, medium;
         private static Texture HUD, HUDult, hpTexture, manaTexture, blackTexture, energieTexture;
         private static Texture temp, summonerheal, summonerbarrier, summonerboost, summonerclairvoyance, summonerdot, summonerexhaust, summonerflash, summonerhaste, summonermana, summonerodingarrison, summonerrevive, summonersmite, summonerteleport;
         private static void Main(string[] args)
@@ -59,8 +64,8 @@ namespace ConsoleApplication12
             #region load images/fonts
             Sprite = new Sprite(Render.Device);
             HUDult = Texture.FromMemory(Drawing.Direct3DDevice, (byte[])new ImageConverter().ConvertTo(Resources.HUDult, typeof(byte[])), 16, 16, 0, Usage.None, Format.A1, Pool.Managed, Filter.Default, Filter.Default, 0);
-            blackTexture = Texture.FromMemory(Drawing.Direct3DDevice, (byte[])new ImageConverter().ConvertTo(Resources.schwarz, typeof(byte[])), 62 + 24+10, 90, 0, Usage.None, Format.A1, Pool.Managed, Filter.Default, Filter.Default, 0);
-            HUD = Texture.FromMemory(Drawing.Direct3DDevice, (byte[])new ImageConverter().ConvertTo(Resources.HUDtest, typeof(byte[])), 62 + 24+10, 90, 0, Usage.None, Format.A1, Pool.Managed, Filter.Default, Filter.Default, 0);
+            blackTexture = Texture.FromMemory(Drawing.Direct3DDevice, (byte[])new ImageConverter().ConvertTo(Resources.schwarz, typeof(byte[])), 62 + 24 + 10, 90, 0, Usage.None, Format.A1, Pool.Managed, Filter.Default, Filter.Default, 0);
+            HUD = Texture.FromMemory(Drawing.Direct3DDevice, (byte[])new ImageConverter().ConvertTo(Resources.HUDtest, typeof(byte[])), 62 + 24 + 10, 90, 0, Usage.None, Format.A1, Pool.Managed, Filter.Default, Filter.Default, 0);
             hpTexture = Texture.FromMemory(Drawing.Direct3DDevice, (byte[])new ImageConverter().ConvertTo(Resources.HPbar, typeof(byte[])), 58, 10, 0, Usage.None, Format.A1, Pool.Managed, Filter.Default, Filter.Default, 0);
             manaTexture = Texture.FromMemory(Drawing.Direct3DDevice, (byte[])new ImageConverter().ConvertTo(Resources.MANAbar, typeof(byte[])), 58, 10, 0, Usage.None, Format.A1, Pool.Managed, Filter.Default, Filter.Default, 0);
             energieTexture = Texture.FromMemory(Drawing.Direct3DDevice, (byte[])new ImageConverter().ConvertTo(Resources.Energiebar, typeof(byte[])), 58, 10, 0, Usage.None, Format.A1, Pool.Managed, Filter.Default, Filter.Default, 0);
@@ -101,12 +106,6 @@ namespace ConsoleApplication12
                 OutputPrecision = FontPrecision.Default,
                 Quality = FontQuality.Default
             });
-            #endregion 
-            #region thread for image download
-
-         //   Thread newThread = new Thread(Program.LoadImages);
-           // newThread.Start();
-
             #endregion
             CustomEvents.Game.OnGameLoad += Game_OnGameLoad;
         }
@@ -118,17 +117,22 @@ namespace ConsoleApplication12
 
         private static void Game_OnGameLoad(EventArgs args)
         {
+
             SidebarMenu = new Menu("sidebar", "sidebar", true);
             Leftbar = new Menu("Allie Sidebar", "Left sidebar", false);
+            SummonerW = new Menu("write Summeners", "summener");
             Leftbar.AddItem(new MenuItem("Activate2", "Activate")).SetValue(true);
             Leftbar.AddItem(new MenuItem("offX5", "Offset for width").SetValue(new Slider(0, -80, 80)));
             Leftbar.AddItem(new MenuItem("offY5", "Offset for height").SetValue(new Slider(0, -200, 200)));
             Leftbar.AddItem(new MenuItem("Distance", "Distance").SetValue(new Slider(0, -50, 50)));
             SidebarMenu.AddSubMenu(Leftbar);
             SidebarMenu.AddItem(new MenuItem("Activate", "Activate")).SetValue(true);
-            SidebarMenu.AddItem(new MenuItem("Activate", "Only draw visible enemies")).SetValue(true);
+            SidebarMenu.AddItem(new MenuItem("Activate4", "Only draw visible enemies")).SetValue(true);
+            SummonerW.AddItem(new MenuItem("hootkey", "combo hotkey").SetValue(new KeyBind(20, KeyBindType.Press)));
+            SummonerW.AddItem(new MenuItem("challenger", "challenger mod").SetValue(false));
+            SummonerW.AddItem(new MenuItem("Activate3", "Activate").SetValue(true));
+            SidebarMenu.AddSubMenu(SummonerW);
             SidebarMenu.AddToMainMenu();
-
 
             var attempt = 0;
             _version = GameVersion();
@@ -141,28 +145,60 @@ namespace ConsoleApplication12
             if (!string.IsNullOrEmpty(_version))
             {
                 Thread newThread = new Thread(LoadImages);
+                newThread.IsBackground = true;
                 newThread.Start();
                 Print("Loaded! ");
-                Drawing.OnPostReset += DrawingOnPostReset;
                 Drawing.OnPreReset += DrawingOnPreReset;
-                Drawing.OnEndScene += Drawing_OnDraw;
-
+                Drawing.OnPostReset += DrawingOnPostReset;
+                Drawing.OnEndScene += Drawing_EndScene;
+                AppDomain.CurrentDomain.DomainUnload += CurrentDomainOnDomainUnload;
+                AppDomain.CurrentDomain.ProcessExit += CurrentDomainOnDomainUnload;
+                Game.OnWndProc += Game_OnWndProc;
             }
         }
-
-
 
         private static void CurrentDomainOnDomainUnload(object sender, EventArgs e)
         {
             Sprite.Dispose();
+            small.Dispose();
+            medium.Dispose();
+            respawnfont.Dispose();
         }
+
+        static void Game_OnWndProc(WndEventArgs args)
+        {
+            if (args.Msg != (uint)WindowsMessages.WM_LBUTTONDOWN)
+            {
+                return;
+            }
+            if (Game.Time-lastclick <0.5&&lastpositon== Game.CursorPos.To2D())
+            {
+                doublepress = true;
+            }
+            else
+            {
+                doublepress = false;
+            }
+            lastclick = Game.Time;
+             lastpositon= Game.CursorPos.To2D();
+        }
+
+
+
         private static void DrawingOnPostReset(EventArgs args)
         {
+           
+            small.OnResetDevice();
+            medium.OnResetDevice();
+            respawnfont.OnResetDevice();
             Sprite.OnResetDevice();
         }
         private static void DrawingOnPreReset(EventArgs args)
         {
             Sprite.OnLostDevice();
+            small.OnLostDevice();
+            medium.OnLostDevice();
+            respawnfont.OnResetDevice();
         }
 
         static Texture summonerTexture(string spellname)
@@ -170,7 +206,7 @@ namespace ConsoleApplication12
             switch (spellname.ToLower())
             {//shitty code but im to tired
                 case "summonerodingarrison":
-                    return summonerodingarrison;                    
+                    return summonerodingarrison;
                 case "summonerrevive":
                     return summonerrevive;
                 case "summonerclairvoyance":
@@ -185,20 +221,20 @@ namespace ConsoleApplication12
                     return summonerheal;
                 case "summonerexhaust":
                     return summonerexhaust;
-                case "summonersmite":
-                    return summonersmite;
                 case "summonerdot":
-                    return summonerdot; 
+                    return summonerdot;
                 case "summonerhaste":
                     return summonerhaste;
                 case "summonerflash":
                     return summonerflash;
-                default:
+                case "summonerbarrier":
                     return summonerbarrier;
+                default:
+                    return summonersmite;
             }
 
         }
-        static void Drawing_OnDraw(EventArgs args)
+        static void Drawing_EndScene(EventArgs args)
         {
             if (Drawing.Direct3DDevice == null || Drawing.Direct3DDevice.IsDisposed)
                 return;
@@ -207,41 +243,88 @@ namespace ConsoleApplication12
                 #region right
                 if (SidebarMenu.Item("Activate").GetValue<bool>()) //drawHUD
                 {
-                    
-                    x = -Width + ((62 + 24+10) * scale);
+
+                    x = -Width + ((62 + 24 + 10) * scale);
                     y = Height * -.10f;
                     int zahler = 0;
                     foreach (var enemie in enemyList)
                     {
                         x = x - 10;
                         int z = 0;
-                        foreach (var sSlot in SummonerSpellSlots)    //Imeh again
+                        foreach (var sSlot in SummonerSpellSlots)    
                         {
                             var spell = enemie.Hero.Spellbook.GetSpell(sSlot);
 
-                            var t = spell.CooldownExpires - Game.Time;
+                            var t = 100;//spell.CooldownExpires - Game.Time
                             var percent = (Math.Abs(spell.Cooldown) > float.Epsilon) ? t / spell.Cooldown : 1f;
-                           var n = (t > 0) ? (int)(19 * (1f - percent)) : 19;
-                             var ts = TimeSpan.FromSeconds((int)t);
-                             var s = t > 60 ? string.Format("{0}:{1:D2}", ts.Minutes, ts.Seconds) : String.Format("{0:0}", t);
-                        if (t > 0)
+                            var n = (t > 0) ? (int)(19 * (1f - percent)) : 19;
+                            var ts = TimeSpan.FromSeconds((int)t);
+                            var s = t > 60 ? string.Format("{0}:{1:D2}", ts.Minutes, ts.Seconds) : String.Format("{0:0}", t);
+                            if (t > 0)
+                            {
+
+                                medium.DrawText(
+                                    null, s, Convert.ToInt32(-x - 4 - s.Length*7), Convert.ToInt32(-y + 7 + z),
+                                    new ColorBGRA(255, 255, 255, 255));
+
+
+                           
+                            if (SummonerW.Item("Activate3").GetValue<bool>())
                             {
                                
-                                medium.DrawText(
-                                    null, s, Convert.ToInt32(-x - 4 - s.Length * 7), Convert.ToInt32(-y + 7 + z),
-                                    new ColorBGRA(255, 255, 255, 255));
-                            }
+                                var s2 = t > 60
+                                    ? string.Format("{0}{1:D2}", ts.Minutes, ts.Seconds)
+                                    : String.Format("{0:0}", t);
+                                
+                                SharpDX.RectangleF summoner = new SharpDX.RectangleF(-(x - 2), -(y - 7 - z), 24, 24);
+                        //        SharpDX.RectangleF icon = new SharpDX.RectangleF(-(x - 23 - 5), -(y - 8), 55, 55);
+                                if (lastsay + 1 < Game.Time) //say it to the chat
+                                {
+                                   
+                                    if (doublepress)
+                                    {
+                                        
+              
+                                        if (summoner.Contains(Utils.GetCursorPos()))
+                                        {
+                                            lastsay = Game.Time;
+                                            doublepress = false;
+                                            if (SummonerW.Item("challenger").GetValue<bool>())
+                                            {
 
-                            
-                        Sprite.Begin();
-                      Sprite.Draw(summonerTexture(spell.Name), new ColorBGRA(255, 255, 255, 255), new SharpDX.Rectangle(0, 24 * n, 24, 24), new Vector3(x - 2, y - 7 - z, 0));
-                        Sprite.End();
+                                                Game.Say(nickname(enemie.Hero.BaseSkinName) + " " +
+                                                         realSummoner(spell.Name) + " " + s2);
+                                            }
+                                            else
+                                            {
+                                                Game.Say(nickname(enemie.Hero.BaseSkinName) + " " +
+                                                         realSummoner(spell.Name) + " " + "down");
+                                            }
+
+                                        }
+                                 //  if (icon.Contains(Utils.GetCursorPos()))
+                                  //      {
+                                    //     lastsay = Game.Time;
+                                      //    doublepress = false;
+                                   
+                           /// Game.Say(nickname(enemie.Hero.BaseSkinName)+ " no summoner");
+                              //          }
+                                    }
+                                 
+
+                                }
+                            }
+                            }
+                            Sprite.Begin();
+                            Sprite.Draw(summonerTexture(spell.Name), new ColorBGRA(255, 255, 255, 255), new SharpDX.Rectangle(0, 24 * n, 24, 24), new Vector3(x - 2, y - 7 - z, 0));
+                            Sprite.End();
 
                             z = 24;
 
-                            #endregion
+                #endregion
 
-                        } //Imeh end 
+                        }
+                        doublepress = false;
                         x = x - 23;//fix wege i ha falsch agfange
 
 
@@ -259,11 +342,11 @@ namespace ConsoleApplication12
                             String timetorespawn = (Math.Round(respawntime[zahler] - Game.ClockTime)).ToString();
                             if (timetorespawn.Length == 1)
                             {
-                                respawnfont.DrawText(null, timetorespawn,(int)x * -1 + 21,(int)y * -1 + 13,new ColorBGRA(248, 248, 255, 255));
+                                respawnfont.DrawText(null, timetorespawn, (int)x * -1 + 21, (int)y * -1 + 13, new ColorBGRA(248, 248, 255, 255));
                             }
                             else
                             {
-                                respawnfont.DrawText(null, timetorespawn,(int)x * -1 + 10,(int)y * -1 + 13,new ColorBGRA(248, 248, 255, 255));
+                                respawnfont.DrawText(null, timetorespawn, (int)x * -1 + 10, (int)y * -1 + 13, new ColorBGRA(248, 248, 255, 255));
                             }
                         }
 
@@ -274,9 +357,9 @@ namespace ConsoleApplication12
                         hpwidth = Convert.ToInt32(((58f / 100f) * (enemie.Hero.HealthPercentage())));
                         Sprite.Begin(); //DRAW HUD
                         // //ziel:-1617 / -124 //bild 1 -4/-26 55x55
-                        x = x + 23+10;//fix wege i ha falsch agfange
-                        Sprite.Draw(HUD, new ColorBGRA(255, 255, 255, 255), new SharpDX.Rectangle(1, 0, 62 + 23+10, 90), new Vector3(x, y, 0), null); //todo add % value for heigh 
-                        x = x - 23-10;//fix wege i ha falsch agfange
+                        x = x + 23 + 10;//fix wege i ha falsch agfange
+                        Sprite.Draw(HUD, new ColorBGRA(255, 255, 255, 255), new SharpDX.Rectangle(1, 0, 62 + 23 + 10, 90), new Vector3(x, y, 0), null); //todo add % value for heigh 
+                        x = x - 23 - 10;//fix wege i ha falsch agfange
                         Sprite.End();
                         // //draw level  weiss =    248-248-255
                         small.DrawText(null, enemie.Hero.Level.ToString(), (int)x * -1 + 48, (int)y * -1 + 52, new ColorBGRA(248, 248, 255, 255));
@@ -309,7 +392,7 @@ namespace ConsoleApplication12
                             small.DrawText(null, Mana, (int)x * -1 + 2 + Manalength, (int)y * -1 + 65 + 14,
                                 new ColorBGRA(248, 248, 255, 255));
                         }
-                   
+
                         int minionlength = 0;
 
                         switch (enemie.Hero.MinionsKilled.ToString().Length)// zentriere
@@ -327,7 +410,7 @@ namespace ConsoleApplication12
                                 break;
                         }
                         x = x + 10 + 24;
-                        small.DrawText(null, enemie.Hero.MinionsKilled.ToString(), (int)x * -1+  minionlength, (int)y * -1 + 62, new ColorBGRA(248, 248, 255, 255));
+                        small.DrawText(null, enemie.Hero.MinionsKilled.ToString(), (int)x * -1 + minionlength, (int)y * -1 + 62, new ColorBGRA(248, 248, 255, 255));
                         x = x - 10 - 24;
                         //draw HP/MAXHP 
 
@@ -338,63 +421,62 @@ namespace ConsoleApplication12
                         if (!enemie.Hero.IsVisible || enemie.Hero.IsDead)//make it black :)
                         {
                             Sprite.Begin(); //DRAW icon 255, 255, 255, 255
-                            Sprite.Draw(blackTexture, new ColorBGRA(255, 255, 255, 110), null, new Vector3(x+24+10, y, 0), null);
+                            Sprite.Draw(blackTexture, new ColorBGRA(255, 255, 255, 110), null, new Vector3(x + 24 + 10, y, 0), null);
                             Sprite.End();
                         }
 
-                        if (enemie.Hero.Health < 350&&!enemie.Hero.IsDead)//eventuell && (int)hero.Spellbook.GetSpell(SpellSlot.R).SData.CastRange.GetValue(0) < 5000 && enemie.Hero.ServerPosition.Distance(hero.ServerPosition) < (int)hero.Spellbook.GetSpell(SpellSlot.R).SData.CastRange.GetValue(0) && hero.Spellbook.GetSpell(SpellSlot.R).Cooldown.Equals(0) && hero.Level >= 6)
-                         
+                        if (enemie.Hero.Health < 350 && !enemie.Hero.IsDead)//eventuell && (int)hero.Spellbook.GetSpell(SpellSlot.R).SData.CastRange.GetValue(0) < 5000 && enemie.Hero.ServerPosition.Distance(hero.ServerPosition) < (int)hero.Spellbook.GetSpell(SpellSlot.R).SData.CastRange.GetValue(0) && hero.Spellbook.GetSpell(SpellSlot.R).Cooldown.Equals(0) && hero.Level >= 6)
                         {
-                          //todo ping on  enemie.Hero.ServerPosition
-                          {
+                            //todo ping on  enemie.Hero.ServerPosition
+                            {
 
-                          //    LeagueSharp.Network..S2C.Ping.Encoded(new Packet.S2C.Ping.Struct(enemie.Hero.Position.X, enemie.Hero.Position.Y,enemie.Hero.NetworkId,ObjectManager.Player.NetworkId, Packet.PingType.Danger)).Process();
-                          }
+                                //    LeagueSharp.Network..S2C.Ping.Encoded(new Packet.S2C.Ping.Struct(enemie.Hero.Position.X, enemie.Hero.Position.Y,enemie.Hero.NetworkId,ObjectManager.Player.NetworkId, Packet.PingType.Danger)).Process();
+                            }
 
                         }
                         x = x + 23 + 10;
                         y = y - 94;
                         zahler++;
-                     
+
                     }
                 }
 
                 #region leftsidebar
                 if (Leftbar.Item("Activate2").GetValue<bool>())
+                {
+                    x = (Leftbar.Item("offX5").GetValue<Slider>().Value * -1) - 50;
+                    y = Leftbar.Item("offY5").GetValue<Slider>().Value - 50;
+                    foreach (Obj_AI_Hero herosHero in ObjectManager.Get<Obj_AI_Hero>().Where(herosHero => herosHero != null && herosHero.Team == ObjectManager.Player.Team && hero.IsValid && herosHero.Name != hero.Name))
                     {
-                        x = (Leftbar.Item("offX5").GetValue<Slider>().Value*-1)-50;
-                        y = Leftbar.Item("offY5").GetValue<Slider>().Value-50 ;
-                        foreach (Obj_AI_Hero herosHero in ObjectManager.Get<Obj_AI_Hero>().Where(herosHero => herosHero != null && herosHero.Team == ObjectManager.Player.Team && hero.IsValid && herosHero.Name != hero.Name))
+                        int z = 0;
+                        foreach (var sSlot in SummonerSpellSlots)    //Imeh again
                         {
-                            int z = 0;
-                            foreach (var sSlot in SummonerSpellSlots)    //Imeh again
+                            var spell = herosHero.Spellbook.GetSpell(sSlot);
+
+                            var t = spell.CooldownExpires - Game.Time;
+                            var percent = (Math.Abs(spell.Cooldown) > float.Epsilon) ? t / spell.Cooldown : 1f;
+                            var n = (t > 0) ? (int)(19 * (1f - percent)) : 19;
+                            var ts = TimeSpan.FromSeconds((int)t);
+                            var s = t > 60 ? string.Format("{0}:{1:D2}", ts.Minutes, ts.Seconds) : String.Format("{0:0}", t);
+                            if (t > 0)
                             {
-                                var spell = herosHero.Spellbook.GetSpell(sSlot);
 
-                                var t = spell.CooldownExpires - Game.Time;
-                                var percent = (Math.Abs(spell.Cooldown) > float.Epsilon) ? t / spell.Cooldown : 1f;
-                                var n = (t > 0) ? (int)(19 * (1f - percent)) : 19;
-                                var ts = TimeSpan.FromSeconds((int)t);
-                                var s = t > 60 ? string.Format("{0}:{1:D2}", ts.Minutes, ts.Seconds) : String.Format("{0:0}", t);
-                                if (t > 0)
-                                {
-
-                                    medium.DrawText(
-                                        null, s, Convert.ToInt32(-x + 30), Convert.ToInt32(-y + 10+ z),
-                                        new ColorBGRA(255, 255, 255, 255));
-                                }
-
-
-                               
-                                Sprite.Begin();
-                                Sprite.Draw(summonerTexture(spell.Name), new ColorBGRA(255, 255, 255, 255), new SharpDX.Rectangle(0, 24 * n, 24, 24), new Vector3(x - 2, y - 7 - z, 0));
-                                Sprite.End();
-                                z = 24;
-                             
+                                medium.DrawText(
+                                    null, s, Convert.ToInt32(-x + 30), Convert.ToInt32(-y + 10 + z),
+                                    new ColorBGRA(255, 255, 255, 255));
                             }
-                            y=y -48-Leftbar.Item("Distance").GetValue<Slider>().Value;
+
+
+
+                            Sprite.Begin();
+                            Sprite.Draw(summonerTexture(spell.Name), new ColorBGRA(255, 255, 255, 255), new SharpDX.Rectangle(0, 24 * n, 24, 24), new Vector3(x - 2, y - 7 - z, 0));
+                            Sprite.End();
+                            z = 24;
+
                         }
+                        y = y - 48 - Leftbar.Item("Distance").GetValue<Slider>().Value;
                     }
+                }
                 #endregion
 
 
@@ -403,7 +485,260 @@ namespace ConsoleApplication12
             catch
             {
                 Console.Write("Sidebar crashed at drawing?");
-            }  
+            }
+        }
+
+
+
+        private static string nickname(string p)
+        {
+            switch (p)
+            {
+                case "Aatrox":
+                    return "aatrox";
+                   
+                case "Akali":
+                    return p.ToLower();
+
+                case "Alistar":
+                    return "al";
+                case "Amumu":
+                    return "mumu";
+                case "Anivia":
+                    return p.ToLower();
+                case "Annie":
+                    return p.ToLower();
+                case "Brand":
+                    return p.ToLower();
+                case "Braum":
+                    return p.ToLower();
+                case "Cassiopeia":
+                    return "cassio";
+                case "Chogath":
+                    return "cho";
+                case "Corki":
+                    return p.ToLower();
+                case "Darius":
+                    return "darius";
+                case "Diana":
+                    return p.ToLower();
+                case "DrMundo":
+                    return "mundo";
+                case "Draven":
+                    return p.ToLower();
+                case "Elise":
+                    return p.ToLower();
+                case "Evelynn":
+                    return "eve";
+                case "Ezreal":
+                    return "ez";
+                case "FiddleSticks":
+                    return "fiddle";
+                case "Fiora":
+                    return p.ToLower();
+
+                case "Galio":
+                    return p.ToLower();
+                case "Gangplank":
+                    return "gp";
+                case "Garen":
+                    return p.ToLower();
+                case "Gragas":
+                    return p.ToLower();
+                case "Graves":
+                    return p.ToLower();
+                case "Heimerdinger":
+                    return "heimer";
+                case "Irelia":
+                    return p.ToLower();
+                case "Janna":
+                    return p.ToLower();
+                case "JarvanIV":
+                    return "jarvan";
+                case "Jayce":
+                    return p.ToLower();
+                case "Karma":
+                    return p.ToLower();
+                case "Karthus":
+                    return p.ToLower();
+                case "Kassadin":
+                    return "kassa";
+                case "Kayle":
+                    return p.ToLower();
+                case "Kennen":
+                    return p.ToLower();
+                case "Khazix":
+                    return "kha";
+                case "KogMaw":
+                    return "kog";
+                case "Leblanc":
+                    return p.ToLower();
+                case "LeeSin":
+                    return "lee";
+                case "Leona":
+                    return p.ToLower();
+
+                case "Lucian":
+                    return p.ToLower();
+
+                case "Maokai":
+                    return p.ToLower();
+                case "MasterYi":
+                    return "yi";
+                case "MissFortune":
+                    return "mf";
+                case "MonkeyKing":
+                    return "wukong";
+                case "Mordekaiser":
+                    return "morde";
+                case "Morgana":
+                    return p.ToLower();
+                case "Nasus":
+                    return p.ToLower();
+
+                case "Nocturne":
+                    return "noc";
+
+                case "Orianna":
+                    return "ori";
+                case "Pantheon":
+                    return "panth";
+                case "Poppy":
+                    return p.ToLower();
+                case "Quinn":
+                    return p.ToLower();
+                case "Rammus":
+                    return p.ToLower();
+                case "Renekton":
+                    return "renek";
+                case "Rengar":
+                    return p.ToLower();
+                case "Riven":
+                    return p.ToLower();
+                case "Rumble":
+                    return p.ToLower();
+
+                case "Shaco":
+                    return p.ToLower();
+
+                case "Singed":
+                    return p.ToLower();
+
+                case "Sivir":
+                    return p.ToLower();
+                case "Skarner":
+                    return p.ToLower();
+                case "Soraka":
+                    return p.ToLower();
+                case "Swain":
+                    return p.ToLower();
+                case "Syndra":
+                    return p.ToLower();
+                case "Talon":
+                    return p.ToLower();
+                case "Taric":
+                    return p.ToLower();
+                case "Teemo":
+                    return p.ToLower();
+                case "Thresh":
+                    return p.ToLower();
+                case "Tristana":
+                    return "tris";
+
+                case "Trundle":
+                    return p.ToLower();
+                case "Tryndamere":
+                    return "trynda";
+                case "TwistedFate":
+                    return "tf";
+                case "Twitch":
+                    return "twitch";
+                case "RekSai":
+                    return "rek";
+                case "Kalista":
+                    return p.ToLower();
+                case "Udyr":
+                    return p.ToLower();
+                case "Urgot":
+                    return p.ToLower();
+                case "Varus":
+                    return p.ToLower();
+                case "Vayne":
+                    return p.ToLower();
+                case "Veigar":
+                    return p.ToLower();
+
+                case "Viktor":
+                    return "vik";
+                case "Vladimir":
+                    return "vlad";
+                case "Volibear":
+                    return "voli";
+                case "Warwick":
+                    return "ww"; break;
+                case "Xerath":
+                    return "xerath";
+                case "XinZhao":
+                    return "xin";
+
+                case "Yorick":
+                    return p.ToLower();
+
+                case "Ziggs":
+                    return "ziggs";
+                case "Zilean":
+                    return p.ToLower();
+                case "Zyra":
+                    return "zyra";
+                default:
+                    if (p.Length > 4)
+                    {
+                        return p.ToLower().Substring(0, 4);
+                    }
+                    return p.ToLower();
+
+            }
+
+
+        }
+
+        private static string realSummoner(string p)
+        {
+
+            switch (p.ToLower())
+            {//shitty code but im to tired
+                case "summonerodingarrison":
+                    return "garrison";
+                case "summonerrevive":
+                    return "revive";
+                case "summonerclairvoyance":
+                    return "clairvoyance";
+                case "summonerboost":
+                    return "cleanse";
+                case "summonermana":
+                    return "clarity";
+                case "summonerteleport":
+                    return "tp";
+                case "summonerheal":
+                    return "heal";
+                case "summonerexhaust":
+                    return "exhaust";
+                case "summonersmite":
+                    return "smite";
+                case "summonerdot":
+                    return "ignit";
+                case "summonerhaste":
+                    return "ghost";
+                case "summonerbarrier":
+                    return "barrier";
+                case "summonerflash":
+                    return "flash";
+                default:
+                    return "smite";
+
+            }
+
+
         }
 
         //TheSaltyWaffle Universal Minimaphack (fetching Champion Icons)
@@ -523,6 +858,8 @@ namespace ConsoleApplication12
 
 
         }
+
+        
     }
 }
 
